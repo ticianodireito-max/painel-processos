@@ -734,4 +734,3 @@ elif pagina == "Processos cadastrados":
             use_container_width=True,
             hide_index=True,
         )
-        )
