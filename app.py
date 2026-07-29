@@ -1,9 +1,15 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import pandas as pd
 import streamlit as st
+
+from components.ui import (
+    cabecalho_pagina,
+    carregar_estilos,
+    cartao_indicador,
+    marca_sidebar,
+    titulo_secao,
+)
 
 from database import (
     atualizar_processo,
@@ -20,41 +26,11 @@ st.set_page_config(
     page_title="Sistema Estratégico de Processos",
     page_icon="⚖️",
     layout="wide",
+    initial_sidebar_state="expanded",
 )
 
-def carregar_css() -> None:
-    caminho_css = Path(__file__).parent / "assets" / "styles.css"
-    if caminho_css.exists():
-        st.markdown(
-            f"<style>{caminho_css.read_text(encoding='utf-8')}</style>",
-            unsafe_allow_html=True,
-        )
+carregar_estilos()
 
-
-def cabecalho_pagina(titulo: str, descricao: str) -> None:
-    st.markdown(
-        f"""
-        <h2 class="page-heading">{titulo}</h2>
-        <p class="page-description">{descricao}</p>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-def cartao_indicador(icone: str, valor: int, rotulo: str) -> None:
-    st.markdown(
-        f"""
-        <div class="metric-card">
-            <div class="metric-icon">{icone}</div>
-            <div class="metric-value">{valor}</div>
-            <div class="metric-label">{rotulo}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
-carregar_css()
 criar_banco()
 
 AREAS = [
@@ -186,45 +162,27 @@ def exibir_processo(processo: pd.Series) -> None:
         )
 
 
-st.markdown(
-    """
-    <h1 class="app-title">Sistema Estratégico de Processos</h1>
-    <p class="app-subtitle">Gerenciamento de processos estratégicos.</p>
-    """,
-    unsafe_allow_html=True,
-)
+marca_sidebar()
 
-st.sidebar.markdown(
-    """
-    <div class="sidebar-brand">
-        <div class="sidebar-brand-title">Sistema de Processos</div>
-        <div class="sidebar-brand-caption">Navegação principal</div>
-    </div>
-    """,
-    unsafe_allow_html=True,
-)
-
-opcoes_menu = {
-    "◼  Dashboard": "Dashboard",
-    "＋  Novo processo": "Cadastrar processo",
-    "✎  Editar processo": "Editar processo",
-    "⌕  Pesquisar": "Pesquisar",
-    "★  Visão da chefia": "Visão da chefia",
-    "▤  Todos os processos": "Processos cadastrados",
-}
-
-rotulo_pagina = st.sidebar.radio(
+pagina_com_icone = st.sidebar.radio(
     "Menu principal",
-    list(opcoes_menu.keys()),
+    [
+        "▦  Dashboard",
+        "+  Cadastrar processo",
+        "✎  Editar processo",
+        "⌕  Pesquisar",
+        "◇  Visão da chefia",
+        "□  Processos cadastrados",
+    ],
     label_visibility="collapsed",
 )
-pagina = opcoes_menu[rotulo_pagina]
+pagina = pagina_com_icone.split("  ", 1)[1]
 
 
 if pagina == "Dashboard":
     cabecalho_pagina(
-        "Dashboard",
-        "Visão geral dos processos e das providências que exigem atenção.",
+        "Sistema Estratégico de Processos",
+        "Visão geral dos processos, prioridades e providências pendentes.",
     )
 
     processos = listar_processos()
@@ -234,12 +192,8 @@ if pagina == "Dashboard":
     else:
         total = len(processos)
 
-        urgentes = processos[
-            processos["prioridade"].eq("Urgente")
-        ]
-
         prioridades_altas = processos[
-            processos["prioridade"].eq("Alta")
+            processos["prioridade"].isin(["Alta", "Urgente"])
         ]
 
         pendencias = processos[
@@ -249,21 +203,24 @@ if pagina == "Dashboard":
             .ne("")
         ]
 
+        urgentes = processos[processos["prioridade"].eq("Urgente")]
+
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            cartao_indicador("▤", total, "Processos cadastrados")
+            cartao_indicador("Processos cadastrados", total, "□", "primary")
         with col2:
-            cartao_indicador("!", len(urgentes), "Processos urgentes")
+            cartao_indicador("Urgentes", len(urgentes), "!", "danger")
         with col3:
-            cartao_indicador("↑", len(prioridades_altas), "Prioridade alta")
+            cartao_indicador(
+                "Alta prioridade", len(prioridades_altas), "↑", "warning"
+            )
         with col4:
-            cartao_indicador("✓", len(pendencias), "Providências pendentes")
+            cartao_indicador(
+                "Providências pendentes", len(pendencias), "✓", "success"
+            )
 
-        st.markdown(
-            '<div class="section-title">Cadastros recentes</div>',
-            unsafe_allow_html=True,
-        )
+        titulo_secao("Cadastros recentes", "Os dez registros mais recentes do sistema.")
 
         colunas = [
             "numero",
@@ -279,20 +236,11 @@ if pagina == "Dashboard":
             processos.head(10)[colunas],
             use_container_width=True,
             hide_index=True,
-            column_config={
-                "numero": "Processo",
-                "area": "Área",
-                "assunto": "Assunto",
-                "prioridade": "Prioridade",
-                "situacao": "Situação",
-                "responsavel": "Responsável",
-                "prazo_relevante": "Prazo relevante",
-            },
         )
 
 
 elif pagina == "Cadastrar processo":
-    cabecalho_pagina("Novo processo", "Cadastre as informações jurídicas e gerenciais do processo.")
+    cabecalho_pagina("Cadastrar processo", "Inclua um novo processo estratégico no sistema.")
 
     with st.form(
         "formulario_cadastro",
@@ -436,7 +384,7 @@ elif pagina == "Cadastrar processo":
 
 
 elif pagina == "Editar processo":
-    cabecalho_pagina("Editar processo", "Atualize as informações de um processo já cadastrado.")
+    cabecalho_pagina("Editar processo", "Atualize os dados de um processo já cadastrado.")
 
     processos = listar_processos()
 
@@ -677,7 +625,7 @@ elif pagina == "Pesquisar":
 
 
 elif pagina == "Visão da chefia":
-    cabecalho_pagina("Visão da chefia", "Acompanhe prioridades, providências pendentes e prazos relevantes.")
+    cabecalho_pagina("Visão da chefia", "Acompanhamento concentrado de prioridades e providências.")
 
     processos = listar_processos()
 
@@ -729,7 +677,7 @@ elif pagina == "Visão da chefia":
 
 
 elif pagina == "Processos cadastrados":
-    cabecalho_pagina("Todos os processos", "Consulte a relação completa dos processos cadastrados.")
+    cabecalho_pagina("Processos cadastrados", "Relação completa dos registros disponíveis.")
 
     processos = listar_processos()
 
