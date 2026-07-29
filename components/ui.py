@@ -69,10 +69,10 @@ def marca_sidebar() -> None:
     st.sidebar.markdown(
         """
         <div class="sidebar-brand">
-            <div class="sidebar-brand-mark">S</div>
+            <div class="sidebar-brand-mark">⚖</div>
             <div>
                 <div class="sidebar-brand-title">Sistema Estratégico</div>
-                <div class="sidebar-brand-subtitle">Processos</div>
+                <div class="sidebar-brand-subtitle">Gestão de Processos</div>
             </div>
         </div>
         """,
