@@ -69,6 +69,36 @@ NIVEIS_ACESSO = [
 ]
 
 
+ROTULOS_COLUNAS = {
+    "numero": "Número do Processo",
+    "area": "Área Jurídica",
+    "classe": "Classe Processual",
+    "assunto": "Assunto",
+    "autor": "Autor",
+    "reu": "Réu",
+    "prioridade": "Prioridade",
+    "situacao": "Situação",
+    "responsavel": "Procurador Responsável",
+    "providencia_pendente": "Providência Pendente",
+    "prazo_relevante": "Prazo Relevante",
+    "data_cadastro": "Data de Cadastro",
+    "data_atualizacao": "Última Atualização",
+}
+
+
+def preparar_tabela(dados: pd.DataFrame, colunas: list[str]) -> pd.DataFrame:
+    tabela = dados.loc[:, colunas].copy()
+    tabela = tabela.fillna("—")
+
+    for coluna in tabela.columns:
+        if tabela[coluna].dtype == object:
+            tabela[coluna] = tabela[coluna].replace(
+                {"": "—", "None": "—", "nan": "—"}
+            )
+
+    return tabela.rename(columns=ROTULOS_COLUNAS)
+
+
 def texto(valor) -> str:
     if valor is None:
         return ""
@@ -233,7 +263,7 @@ if pagina == "Dashboard":
         ]
 
         st.dataframe(
-            processos.head(10)[colunas],
+            preparar_tabela(processos.head(10), colunas),
             use_container_width=True,
             hide_index=True,
         )
@@ -670,7 +700,7 @@ elif pagina == "Visão da chefia":
             ]
 
             st.dataframe(
-                pendentes[colunas],
+                preparar_tabela(pendentes, colunas),
                 use_container_width=True,
                 hide_index=True,
             )
@@ -700,7 +730,8 @@ elif pagina == "Processos cadastrados":
         ]
 
         st.dataframe(
-            processos[colunas],
+            preparar_tabela(processos, colunas),
             use_container_width=True,
             hide_index=True,
+        )
         )
