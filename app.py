@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import sqlite3
-
 import pandas as pd
 import streamlit as st
 
@@ -12,6 +10,7 @@ from database import (
     listar_processos,
     obter_processo,
     pesquisar_processos,
+    ProcessoDuplicadoError,
 )
 
 
@@ -357,7 +356,7 @@ elif pagina == "Cadastrar processo":
                     "Processo cadastrado com sucesso."
                 )
 
-            except sqlite3.IntegrityError:
+            except ProcessoDuplicadoError:
                 st.error(
                     "Esse número de processo já está cadastrado."
                 )
@@ -572,7 +571,7 @@ elif pagina == "Editar processo":
                             "Processo atualizado com sucesso."
                         )
 
-                    except sqlite3.IntegrityError:
+                    except ProcessoDuplicadoError:
                         st.error(
                             "Já existe outro processo com esse número."
                         )

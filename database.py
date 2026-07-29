@@ -1,247 +1,164 @@
 from __future__ import annotations
 
-import sqlite3
-from datetime import datetime
-from pathlib import Path
+from typing import Any
 
 import pandas as pd
+from postgrest.exceptions import APIError
+
+from supabase_client import obter_cliente_supabase
 
 
-BASE_DIR = Path(__file__).resolve().parent
-BANCO_PATH = BASE_DIR / "processos.db"
+TABELA = "processos"
+
+COLUNAS = [
+    "id",
+    "numero",
+    "area",
+    "classe",
+    "assunto",
+    "autor",
+    "reu",
+    "orgao_julgador",
+    "relator",
+    "resumo",
+    "palavras_chave",
+    "prioridade",
+    "situacao",
+    "responsavel",
+    "nivel_acesso",
+    "resumo_executivo",
+    "providencia_pendente",
+    "prazo_relevante",
+    "data_cadastro",
+    "data_atualizacao",
+]
+
+CAMPOS_PESQUISA = [
+    "numero",
+    "area",
+    "classe",
+    "assunto",
+    "autor",
+    "reu",
+    "orgao_julgador",
+    "relator",
+    "resumo",
+    "palavras_chave",
+    "prioridade",
+    "situacao",
+    "responsavel",
+    "resumo_executivo",
+    "providencia_pendente",
+    "prazo_relevante",
+]
 
 
-def conectar() -> sqlite3.Connection:
-    conexao = sqlite3.connect(BANCO_PATH)
-    conexao.row_factory = sqlite3.Row
-    return conexao
+class ProcessoDuplicadoError(Exception):
+    """Indica que ja existe processo com o mesmo numero."""
+
+
+def _normalizar_dados(dados: dict[str, Any]) -> dict[str, Any]:
+    """Mantem apenas campos aceitos pela tabela e converte vazios para None."""
+    campos_gravaveis = set(COLUNAS) - {
+        "id",
+        "data_cadastro",
+        "data_atualizacao",
+    }
+
+    resultado: dict[str, Any] = {}
+    for campo in campos_gravaveis:
+        valor = dados.get(campo)
+        if isinstance(valor, str):
+            valor = valor.strip()
+        resultado[campo] = valor if valor != "" else None
+
+    return resultado
+
+
+def _dataframe(registros: list[dict[str, Any]]) -> pd.DataFrame:
+    if not registros:
+        return pd.DataFrame(columns=COLUNAS)
+
+    df = pd.DataFrame(registros)
+    for coluna in COLUNAS:
+        if coluna not in df.columns:
+            df[coluna] = None
+
+    return df[COLUNAS]
+
+
+def _eh_duplicidade(erro: APIError) -> bool:
+    codigo = str(getattr(erro, "code", ""))
+    mensagem = str(erro).lower()
+    return codigo == "23505" or "duplicate key" in mensagem or "unique" in mensagem
 
 
 def criar_banco() -> None:
-    with conectar() as conexao:
-        conexao.execute(
-            """
-            CREATE TABLE IF NOT EXISTS processos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                numero TEXT NOT NULL UNIQUE,
-                area TEXT,
-                classe TEXT,
-                assunto TEXT,
-                autor TEXT,
-                reu TEXT,
-                orgao_julgador TEXT,
-                relator TEXT,
-                resumo TEXT,
-                palavras_chave TEXT,
-                prioridade TEXT DEFAULT 'Normal',
-                situacao TEXT DEFAULT 'Em andamento',
-                responsavel TEXT,
-                nivel_acesso TEXT DEFAULT 'Interno',
-                resumo_executivo TEXT,
-                providencia_pendente TEXT,
-                prazo_relevante TEXT,
-                data_cadastro TEXT NOT NULL,
-                data_atualizacao TEXT
-            )
-            """
-        )
-
-        colunas_existentes = {
-            linha["name"]
-            for linha in conexao.execute(
-                "PRAGMA table_info(processos)"
-            ).fetchall()
-        }
-
-        novas_colunas = {
-            "prioridade": "TEXT DEFAULT 'Normal'",
-            "situacao": "TEXT DEFAULT 'Em andamento'",
-            "responsavel": "TEXT",
-            "nivel_acesso": "TEXT DEFAULT 'Interno'",
-            "resumo_executivo": "TEXT",
-            "providencia_pendente": "TEXT",
-            "prazo_relevante": "TEXT",
-            "data_atualizacao": "TEXT",
-        }
-
-        for nome, definicao in novas_colunas.items():
-            if nome not in colunas_existentes:
-                conexao.execute(
-                    f"ALTER TABLE processos "
-                    f"ADD COLUMN {nome} {definicao}"
-                )
+    """Mantida por compatibilidade; a tabela e criada no Supabase."""
+    obter_cliente_supabase()
 
 
-def cadastrar_processo(dados: dict) -> None:
-    agora = datetime.now().strftime("%d/%m/%Y %H:%M")
-
-    with conectar() as conexao:
-        conexao.execute(
-            """
-            INSERT INTO processos (
-                numero,
-                area,
-                classe,
-                assunto,
-                autor,
-                reu,
-                orgao_julgador,
-                relator,
-                resumo,
-                palavras_chave,
-                prioridade,
-                situacao,
-                responsavel,
-                nivel_acesso,
-                resumo_executivo,
-                providencia_pendente,
-                prazo_relevante,
-                data_cadastro,
-                data_atualizacao
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            (
-                dados["numero"],
-                dados["area"],
-                dados["classe"],
-                dados["assunto"],
-                dados["autor"],
-                dados["reu"],
-                dados["orgao_julgador"],
-                dados["relator"],
-                dados["resumo"],
-                dados["palavras_chave"],
-                dados["prioridade"],
-                dados["situacao"],
-                dados["responsavel"],
-                dados["nivel_acesso"],
-                dados["resumo_executivo"],
-                dados["providencia_pendente"],
-                dados["prazo_relevante"],
-                agora,
-                agora,
-            ),
-        )
+def cadastrar_processo(dados: dict[str, Any]) -> None:
+    cliente = obter_cliente_supabase()
+    try:
+        cliente.table(TABELA).insert(_normalizar_dados(dados)).execute()
+    except APIError as erro:
+        if _eh_duplicidade(erro):
+            raise ProcessoDuplicadoError from erro
+        raise
 
 
-def atualizar_processo(processo_id: int, dados: dict) -> None:
-    agora = datetime.now().strftime("%d/%m/%Y %H:%M")
-
-    with conectar() as conexao:
-        conexao.execute(
-            """
-            UPDATE processos
-            SET
-                numero = ?,
-                area = ?,
-                classe = ?,
-                assunto = ?,
-                autor = ?,
-                reu = ?,
-                orgao_julgador = ?,
-                relator = ?,
-                resumo = ?,
-                palavras_chave = ?,
-                prioridade = ?,
-                situacao = ?,
-                responsavel = ?,
-                nivel_acesso = ?,
-                resumo_executivo = ?,
-                providencia_pendente = ?,
-                prazo_relevante = ?,
-                data_atualizacao = ?
-            WHERE id = ?
-            """,
-            (
-                dados["numero"],
-                dados["area"],
-                dados["classe"],
-                dados["assunto"],
-                dados["autor"],
-                dados["reu"],
-                dados["orgao_julgador"],
-                dados["relator"],
-                dados["resumo"],
-                dados["palavras_chave"],
-                dados["prioridade"],
-                dados["situacao"],
-                dados["responsavel"],
-                dados["nivel_acesso"],
-                dados["resumo_executivo"],
-                dados["providencia_pendente"],
-                dados["prazo_relevante"],
-                agora,
-                processo_id,
-            ),
-        )
+def atualizar_processo(processo_id: int, dados: dict[str, Any]) -> None:
+    cliente = obter_cliente_supabase()
+    try:
+        cliente.table(TABELA).update(_normalizar_dados(dados)).eq(
+            "id", processo_id
+        ).execute()
+    except APIError as erro:
+        if _eh_duplicidade(erro):
+            raise ProcessoDuplicadoError from erro
+        raise
 
 
-def obter_processo(processo_id: int) -> dict | None:
-    with conectar() as conexao:
-        registro = conexao.execute(
-            """
-            SELECT *
-            FROM processos
-            WHERE id = ?
-            """,
-            (processo_id,),
-        ).fetchone()
+def obter_processo(processo_id: int) -> dict[str, Any] | None:
+    cliente = obter_cliente_supabase()
+    resposta = (
+        cliente.table(TABELA)
+        .select("*")
+        .eq("id", processo_id)
+        .limit(1)
+        .execute()
+    )
 
-    if registro is None:
-        return None
-
-    return dict(registro)
+    return resposta.data[0] if resposta.data else None
 
 
 def listar_processos() -> pd.DataFrame:
-    with conectar() as conexao:
-        registros = conexao.execute(
-            """
-            SELECT *
-            FROM processos
-            ORDER BY id DESC
-            """
-        ).fetchall()
-
-    return pd.DataFrame([dict(registro) for registro in registros])
+    cliente = obter_cliente_supabase()
+    resposta = (
+        cliente.table(TABELA)
+        .select("*")
+        .order("id", desc=True)
+        .execute()
+    )
+    return _dataframe(resposta.data or [])
 
 
 def pesquisar_processos(termo: str) -> pd.DataFrame:
-    termo_busca = f"%{termo.strip()}%"
+    termo_normalizado = termo.strip().casefold()
+    processos = listar_processos()
 
-    campos = [
-        "numero",
-        "area",
-        "classe",
-        "assunto",
-        "autor",
-        "reu",
-        "orgao_julgador",
-        "relator",
-        "resumo",
-        "palavras_chave",
-        "prioridade",
-        "situacao",
-        "responsavel",
-        "resumo_executivo",
-        "providencia_pendente",
-        "prazo_relevante",
-    ]
+    if processos.empty or not termo_normalizado:
+        return processos
 
-    condicoes = " OR ".join(
-        f"COALESCE({campo}, '') LIKE ?" for campo in campos
-    )
+    mascara = pd.Series(False, index=processos.index)
+    for campo in CAMPOS_PESQUISA:
+        mascara = mascara | (
+            processos[campo]
+            .fillna("")
+            .astype(str)
+            .str.casefold()
+            .str.contains(termo_normalizado, regex=False)
+        )
 
-    with conectar() as conexao:
-        registros = conexao.execute(
-            f"""
-            SELECT *
-            FROM processos
-            WHERE {condicoes}
-            ORDER BY id DESC
-            """,
-            [termo_busca] * len(campos),
-        ).fetchall()
-
-    return pd.DataFrame([dict(registro) for registro in registros])
+    return processos[mascara].reset_index(drop=True)
