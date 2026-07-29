@@ -197,12 +197,12 @@ marca_sidebar()
 pagina_com_icone = st.sidebar.radio(
     "Menu principal",
     [
-        "▦  Dashboard",
-        "+  Cadastrar processo",
-        "✎  Editar processo",
-        "⌕  Pesquisar",
-        "◇  Visão da chefia",
-        "□  Processos cadastrados",
+        "🏠  Dashboard",
+        "➕  Cadastrar processo",
+        "✏️  Editar processo",
+        "🔎  Pesquisar",
+        "⭐  Visão da chefia",
+        "📂  Processos cadastrados",
     ],
     label_visibility="collapsed",
 )
@@ -212,7 +212,7 @@ pagina = pagina_com_icone.split("  ", 1)[1]
 if pagina == "Dashboard":
     cabecalho_pagina(
         "Sistema Estratégico de Processos",
-        "Visão geral dos processos, prioridades e providências pendentes.",
+        "Painel de acompanhamento dos processos estratégicos, prioridades e providências pendentes.",
     )
 
     processos = listar_processos()
@@ -223,7 +223,7 @@ if pagina == "Dashboard":
         total = len(processos)
 
         prioridades_altas = processos[
-            processos["prioridade"].isin(["Alta", "Urgente"])
+            processos["prioridade"].eq("Alta")
         ]
 
         pendencias = processos[
@@ -250,23 +250,36 @@ if pagina == "Dashboard":
                 "Providências pendentes", len(pendencias), "✓", "success"
             )
 
-        titulo_secao("Cadastros recentes", "Os dez registros mais recentes do sistema.")
-
-        colunas = [
-            "numero",
-            "area",
-            "assunto",
-            "prioridade",
-            "situacao",
-            "responsavel",
-            "prazo_relevante",
-        ]
-
-        st.dataframe(
-            preparar_tabela(processos.head(10), colunas),
-            use_container_width=True,
-            hide_index=True,
+        titulo_secao(
+            "Pesquisa rápida",
+            "Localize imediatamente um processo por número, parte, assunto, tese ou palavra-chave.",
         )
+
+        termo_dashboard = st.text_input(
+            "Pesquisar processos",
+            placeholder="Digite o número do processo, uma parte, o assunto ou uma palavra-chave...",
+            label_visibility="collapsed",
+            key="pesquisa_dashboard",
+        )
+
+        if termo_dashboard.strip():
+            resultados_dashboard = pesquisar_processos(termo_dashboard)
+            if resultados_dashboard.empty:
+                st.warning("Nenhum processo foi encontrado.")
+            else:
+                st.caption(
+                    f"{len(resultados_dashboard)} processo(s) encontrado(s)."
+                )
+                for _, processo in resultados_dashboard.head(10).iterrows():
+                    exibir_processo(processo)
+
+        titulo_secao(
+            "Cadastros recentes",
+            "Acompanhe os dez registros mais recentes do sistema.",
+        )
+
+        for _, processo in processos.head(10).iterrows():
+            exibir_processo(processo)
 
 
 elif pagina == "Cadastrar processo":
