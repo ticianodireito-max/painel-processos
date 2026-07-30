@@ -323,6 +323,7 @@ def exibir_processo(
     processo: pd.Series,
     mostrar_providencia_no_titulo: bool = False,
     contexto: str = "processo",
+    expandido: bool = False,
 ) -> None:
     titulo = (
         f"{texto(processo.get('numero'))} — "
@@ -334,7 +335,7 @@ def exibir_processo(
         if providencia:
             titulo += f" | Providência: {providencia}"
 
-    with st.expander(titulo):
+    with st.expander(titulo, expanded=expandido):
         col1, col2 = st.columns(2)
 
         col1.write(
@@ -606,23 +607,70 @@ if pagina == "Dashboard":
         )
 
         recentes = processos.head(10)
-        colunas_recentes = [
-            "numero",
-            "assunto",
-            "prioridade",
-            "situacao",
-            "responsavel",
-            "data_atualizacao",
-        ]
-        st.dataframe(
-            preparar_tabela(recentes, colunas_recentes),
-            use_container_width=True,
-            hide_index=True,
-        )
 
-        with st.expander("Ver detalhes dos cadastros recentes", expanded=False):
-            for _, processo in recentes.iterrows():
-                exibir_processo(processo, contexto="dashboard_recentes")
+        if "processo_recente_aberto" not in st.session_state:
+            st.session_state.processo_recente_aberto = None
+
+        cabecalho_recente = st.columns([1.55, 4.0, 0.75, 1.0, 1.45, 1.55])
+        cabecalho_recente[0].markdown("**Número do Processo**")
+        cabecalho_recente[1].markdown("**Assunto**")
+        cabecalho_recente[2].markdown("**Prioridade**")
+        cabecalho_recente[3].markdown("**Situação**")
+        cabecalho_recente[4].markdown("**Procurador Responsável**")
+        cabecalho_recente[5].markdown("**Última Atualização**")
+
+        st.markdown("---")
+
+        for _, processo in recentes.iterrows():
+            processo_id = int(processo["id"])
+            colunas_linha = st.columns([1.55, 4.0, 0.75, 1.0, 1.45, 1.55])
+
+            with colunas_linha[0]:
+                if st.button(
+                    texto(processo.get("numero")) or "Sem número",
+                    key=f"abrir_processo_recente_{processo_id}",
+                    use_container_width=True,
+                    help="Abrir as informações completas deste processo",
+                ):
+                    st.session_state.processo_recente_aberto = processo_id
+                    st.rerun()
+
+            colunas_linha[1].write(texto(processo.get("assunto")) or "—")
+            colunas_linha[2].write(texto(processo.get("prioridade")) or "—")
+            colunas_linha[3].write(texto(processo.get("situacao")) or "—")
+            colunas_linha[4].write(texto(processo.get("responsavel")) or "—")
+            colunas_linha[5].write(texto(processo.get("data_atualizacao")) or "—")
+
+        processo_recente_id = st.session_state.processo_recente_aberto
+        if processo_recente_id is not None:
+            processo_recente = obter_processo(int(processo_recente_id))
+
+            st.markdown("---")
+            coluna_titulo_recente, coluna_fechar_recente = st.columns([5, 1])
+
+            with coluna_titulo_recente:
+                titulo_secao(
+                    "Processo selecionado",
+                    "Informações completas do cadastro recente.",
+                )
+
+            with coluna_fechar_recente:
+                if st.button(
+                    "Fechar",
+                    key="fechar_processo_recente",
+                    use_container_width=True,
+                ):
+                    st.session_state.processo_recente_aberto = None
+                    st.rerun()
+
+            if processo_recente is None:
+                st.warning("O processo selecionado não foi encontrado.")
+            else:
+                exibir_processo(
+                    processo_recente,
+                    contexto=f"dashboard_recente_selecionado_{processo_recente_id}",
+                    expandido=True,
+                )
 
 
 elif pagina == "Cadastrar processo":
