@@ -145,8 +145,12 @@ def formatar_tamanho(tamanho_bytes) -> str:
     return f"{tamanho / (1024 * 1024):.1f} MB"
 
 
-def exibir_categoria_documental(processo_id: int, categoria: str) -> None:
-    chave_base = f"documentos_{processo_id}_{categoria}"
+def exibir_categoria_documental(
+    processo_id: int,
+    categoria: str,
+    contexto: str,
+) -> None:
+    chave_base = f"documentos_{contexto}_{processo_id}_{categoria}"
     documentos = listar_documentos(processo_id, categoria)
 
     if documentos.empty:
@@ -188,13 +192,13 @@ def exibir_categoria_documental(processo_id: int, categoria: str) -> None:
                 else:
                     st.button(
                         "PDF indisponível",
-                        key=f"indisponivel_{documento_id}",
+                        key=f"indisponivel_{contexto}_{documento_id}",
                         disabled=True,
                         use_container_width=True,
                     )
 
             with coluna_visualizar:
-                chave_visualizador = f"visualizar_pdf_{documento_id}"
+                chave_visualizador = f"visualizar_pdf_{contexto}_{documento_id}"
                 if st.button(
                     "Visualizar aqui",
                     key=f"botao_{chave_visualizador}",
@@ -207,14 +211,14 @@ def exibir_categoria_documental(processo_id: int, categoria: str) -> None:
             with coluna_excluir:
                 if st.button(
                     "Excluir",
-                    key=f"excluir_documento_{documento_id}",
+                    key=f"excluir_documento_{contexto}_{documento_id}",
                     use_container_width=True,
                 ):
                     excluir_documento(documento_id, caminho)
                     st.success("Documento excluído.")
                     st.rerun()
 
-            if st.session_state.get(f"visualizar_pdf_{documento_id}") and url:
+            if st.session_state.get(f"visualizar_pdf_{contexto}_{documento_id}") and url:
                 components.iframe(url, height=720, scrolling=True)
 
             st.markdown("---")
@@ -287,7 +291,7 @@ def exibir_categoria_documental(processo_id: int, categoria: str) -> None:
             except Exception as erro:
                 st.error(f"Não foi possível adicionar o documento: {erro}")
 
-def exibir_documentos_processo(processo_id: int) -> None:
+def exibir_documentos_processo(processo_id: int, contexto: str) -> None:
     st.markdown("#### Documentos do processo")
     st.caption(
         "Decisões relevantes · Peças processuais relevantes · Outros documentos"
@@ -301,7 +305,7 @@ def exibir_documentos_processo(processo_id: int) -> None:
     )
     if st.button(
         rotulo_botao,
-        key=f"botao_pasta_documentos_{processo_id}",
+        key=f"botao_pasta_documentos_{contexto}_{processo_id}",
         use_container_width=True,
     ):
         st.session_state[chave_pasta] = not st.session_state.get(chave_pasta, False)
@@ -313,11 +317,12 @@ def exibir_documentos_processo(processo_id: int) -> None:
     abas = st.tabs([rotulo for _, rotulo in CATEGORIAS_DOCUMENTAIS])
     for aba, (categoria, _) in zip(abas, CATEGORIAS_DOCUMENTAIS):
         with aba:
-            exibir_categoria_documental(processo_id, categoria)
+            exibir_categoria_documental(processo_id, categoria, contexto)
 
 def exibir_processo(
     processo: pd.Series,
     mostrar_providencia_no_titulo: bool = False,
+    contexto: str = "processo",
 ) -> None:
     titulo = (
         f"{texto(processo.get('numero'))} — "
@@ -394,7 +399,7 @@ def exibir_processo(
         )
 
         st.markdown("---")
-        exibir_documentos_processo(int(processo.get("id")))
+        exibir_documentos_processo(int(processo.get("id")), contexto)
 
         st.caption(
             "Última atualização: "
@@ -549,6 +554,7 @@ if pagina == "Dashboard":
                         mostrar_providencia_no_titulo=(
                             filtro_cartao == "pendencias"
                         ),
+                        contexto=f"dashboard_filtro_{filtro_cartao}",
                     )
 
             st.markdown("---")
@@ -574,7 +580,7 @@ if pagina == "Dashboard":
                     f"{len(resultados_dashboard)} processo(s) encontrado(s)."
                 )
                 for _, processo in resultados_dashboard.head(10).iterrows():
-                    exibir_processo(processo)
+                    exibir_processo(processo, contexto="dashboard_pesquisa")
 
         titulo_secao(
             "Cadastros recentes",
@@ -582,7 +588,7 @@ if pagina == "Dashboard":
         )
 
         for _, processo in processos.head(10).iterrows():
-            exibir_processo(processo)
+            exibir_processo(processo, contexto="dashboard_recentes")
 
 
 elif pagina == "Cadastrar processo":
@@ -983,7 +989,7 @@ elif pagina == "Pesquisar":
             )
 
             for _, processo in resultados.iterrows():
-                exibir_processo(processo)
+                exibir_processo(processo, contexto="pagina_pesquisar")
     else:
         st.info("Digite um termo para iniciar a pesquisa.")
 
@@ -1015,7 +1021,7 @@ elif pagina == "Visão da chefia":
             )
         else:
             for _, processo in urgentes.iterrows():
-                exibir_processo(processo)
+                exibir_processo(processo, contexto="visao_chefia_prioritarios")
 
         st.markdown("### Providências pendentes")
 
