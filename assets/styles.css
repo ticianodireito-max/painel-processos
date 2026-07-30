@@ -973,3 +973,121 @@ small {
         color: #f8fbff !important;
     }
 }
+
+/* Painel executivo do processo */
+.executive-process-header {
+    position: relative;
+    overflow: hidden;
+    margin: 0.35rem 0 1.15rem;
+    padding: 1.55rem 1.7rem;
+    border: 1px solid rgba(49, 105, 180, 0.18);
+    border-radius: 22px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.98), rgba(240,247,255,0.98));
+    box-shadow: 0 16px 38px rgba(25, 66, 117, 0.13);
+    color: #0f172a;
+}
+.executive-process-header::after {
+    content: "";
+    position: absolute;
+    top: -60px;
+    right: -35px;
+    width: 190px;
+    height: 190px;
+    border-radius: 50%;
+    background: rgba(73, 134, 210, 0.10);
+}
+.executive-process-kicker {
+    margin-bottom: 0.5rem;
+    color: #2563a8;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+}
+.executive-process-number {
+    color: #0f2742;
+    font-size: clamp(1.35rem, 2vw, 1.9rem);
+    font-weight: 800;
+    line-height: 1.2;
+}
+.executive-process-subject {
+    margin-top: 0.45rem;
+    color: #263b52;
+    font-size: 1.03rem;
+    font-weight: 600;
+}
+.executive-process-meta,
+.executive-process-update {
+    margin-top: 0.55rem;
+    color: #536b84;
+    font-size: 0.88rem;
+}
+.executive-process-update { margin-top: 0.2rem; }
+.executive-summary-card {
+    min-height: 168px;
+    margin-bottom: 1rem;
+    padding: 1.05rem 1rem;
+    border: 1px solid rgba(54, 105, 163, 0.16);
+    border-radius: 18px;
+    background: rgba(255,255,255,0.97);
+    box-shadow: 0 10px 24px rgba(24, 63, 109, 0.10);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+.executive-summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px rgba(24, 63, 109, 0.15);
+}
+.executive-summary-icon { font-size: 1.35rem; }
+.executive-summary-label {
+    margin-top: 0.65rem;
+    color: #62748a;
+    font-size: 0.69rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+.executive-summary-value {
+    margin-top: 0.45rem;
+    color: #102a43;
+    font-size: 0.98rem;
+    font-weight: 750;
+    line-height: 1.38;
+    overflow-wrap: anywhere;
+}
+.executive-status { border-top: 4px solid #3b82f6; }
+.executive-action { border-top: 4px solid #10b981; }
+.executive-deadline { border-top: 4px solid #f59e0b; }
+.executive-owner { border-top: 4px solid #8b5cf6; }
+.executive-alert {
+    display: flex;
+    gap: .85rem;
+    align-items: center;
+    margin: .1rem 0 1rem;
+    padding: .95rem 1.1rem;
+    border-radius: 14px;
+    font-size: .93rem;
+}
+.executive-alert strong { white-space: nowrap; }
+.executive-alert-atencao {
+    border: 1px solid #f4c76b;
+    background: #fff8e7;
+    color: #714b08;
+}
+.executive-alert-urgente {
+    border: 1px solid #f0a4a4;
+    background: #fff0f0;
+    color: #7f1d1d;
+}
+@media (max-width: 900px) {
+    .executive-summary-card { min-height: auto; }
+    .executive-alert { align-items: flex-start; flex-direction: column; }
+}
+[data-theme="dark"] .executive-process-header,
+[data-theme="dark"] .executive-summary-card {
+    background: linear-gradient(135deg, rgba(18, 38, 61, .98), rgba(22, 48, 77, .98));
+    border-color: rgba(137, 184, 235, .2);
+}
+[data-theme="dark"] .executive-process-number,
+[data-theme="dark"] .executive-summary-value { color: #f3f8ff; }
+[data-theme="dark"] .executive-process-subject { color: #dceafe; }
+[data-theme="dark"] .executive-process-meta,
+[data-theme="dark"] .executive-process-update,
+[data-theme="dark"] .executive-summary-label { color: #a9bfd8; }
