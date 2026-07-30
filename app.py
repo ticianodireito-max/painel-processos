@@ -389,15 +389,79 @@ def exibir_processo(
             return
 
         st.markdown('<div class="process-card-details-marker"></div>', unsafe_allow_html=True)
-        st.markdown("---")
+
+        area = texto(processo.get("area")) or "Área não informada"
+        classe = texto(processo.get("classe")) or "Classe não informada"
+        orgao = texto(processo.get("orgao_julgador")) or "Órgão julgador não informado"
+        relator = texto(processo.get("relator")) or "Relator não informado"
+        atualizacao = texto(processo.get("data_atualizacao")) or "Não informada"
+        resumo_executivo = texto(processo.get("resumo_executivo")) or "Nenhum resumo executivo registrado."
+
+        st.markdown(
+            f"""
+            <section class="executive-process-header">
+                <div class="executive-process-kicker">CONSULTA EXECUTIVA</div>
+                <div class="executive-process-number">⚖️ {numero}</div>
+                <div class="executive-process-subject">{assunto}</div>
+                <div class="executive-process-meta">{area} · {classe} · {orgao}</div>
+                <div class="executive-process-update">Última atualização: {atualizacao}</div>
+            </section>
+            """,
+            unsafe_allow_html=True,
+        )
+
+        col_situacao, col_providencia, col_prazo, col_responsavel = st.columns(4)
+        cards = [
+            (col_situacao, "📍", "SITUAÇÃO ATUAL", situacao, "executive-status"),
+            (col_providencia, "➡️", "PRÓXIMA PROVIDÊNCIA", providencia or "Nenhuma providência registrada", "executive-action"),
+            (col_prazo, "📅", "PRAZO RELEVANTE", prazo, "executive-deadline"),
+            (col_responsavel, "👤", "RESPONSÁVEL", responsavel, "executive-owner"),
+        ]
+        for coluna, icone, rotulo, valor, classe_css in cards:
+            with coluna:
+                st.markdown(
+                    f"""
+                    <div class="executive-summary-card {classe_css}">
+                        <div class="executive-summary-icon">{icone}</div>
+                        <div class="executive-summary-label">{rotulo}</div>
+                        <div class="executive-summary-value">{valor}</div>
+                    </div>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+        if prioridade in {"Urgente", "Alta"} or situacao == "Prazo em curso":
+            nivel_alerta = "urgente" if prioridade == "Urgente" else "atencao"
+            mensagem_alerta = (
+                "Processo classificado como urgente. Recomenda-se acompanhamento prioritário."
+                if prioridade == "Urgente"
+                else "Processo que exige atenção da chefia."
+            )
+            if situacao == "Prazo em curso":
+                mensagem_alerta = f"Há prazo em curso. Prazo relevante: {prazo}."
+            st.markdown(
+                f'<div class="executive-alert executive-alert-{nivel_alerta}"><strong>⚠️ ATENÇÃO</strong><span>{mensagem_alerta}</span></div>',
+                unsafe_allow_html=True,
+            )
+
+        with st.container(border=True):
+            st.markdown('<span class="process-block-marker process-block-executive"></span>', unsafe_allow_html=True)
+            st.markdown("#### 📋 Situação em síntese")
+            st.write(resumo_executivo)
+
+        with st.container(border=True):
+            st.markdown('<span class="process-block-marker process-block-documents"></span>', unsafe_allow_html=True)
+            st.markdown("#### 📚 Decisões e peças relevantes")
+            st.caption("Acesse primeiro os documentos estratégicos do processo. Os demais permanecem organizados em categoria própria.")
+            exibir_documentos_processo(processo_id, contexto)
 
         with st.container(border=True):
             st.markdown('<span class="process-block-marker process-block-info"></span>', unsafe_allow_html=True)
-            st.markdown("#### 📌 Informações gerais")
+            st.markdown("#### 📌 Informações processuais")
             col1, col2 = st.columns(2)
 
-            col1.write(f"**Área:** {texto(processo.get('area')) or '-'}")
-            col1.write(f"**Classe:** {texto(processo.get('classe')) or '-'}")
+            col1.write(f"**Área:** {area}")
+            col1.write(f"**Classe:** {classe}")
             col1.write(f"**Autor:** {texto(processo.get('autor')) or '-'}")
             col1.write(f"**Réu:** {texto(processo.get('reu')) or '-'}")
             col1.write(f"**Responsável:** {responsavel}")
@@ -405,21 +469,8 @@ def exibir_processo(
             col2.write(f"**Prioridade:** {prioridade}")
             col2.write(f"**Situação:** {situacao}")
             col2.write(f"**Nível de acesso:** {texto(processo.get('nivel_acesso')) or '-'}")
-            col2.write(f"**Órgão julgador:** {texto(processo.get('orgao_julgador')) or '-'}")
-            col2.write(f"**Relator:** {texto(processo.get('relator')) or '-'}")
-
-        with st.container(border=True):
-            st.markdown('<span class="process-block-marker process-block-executive"></span>', unsafe_allow_html=True)
-            st.markdown("#### 📋 Resumo executivo")
-            st.write(texto(processo.get("resumo_executivo")) or "-")
-
-            col_providencia, col_prazo = st.columns([2, 1])
-            with col_providencia:
-                st.caption("PROVIDÊNCIA PENDENTE")
-                st.write(providencia or "-")
-            with col_prazo:
-                st.caption("PRAZO RELEVANTE")
-                st.write(prazo)
+            col2.write(f"**Órgão julgador:** {orgao}")
+            col2.write(f"**Relator:** {relator}")
 
         with st.container(border=True):
             st.markdown('<span class="process-block-marker process-block-legal"></span>', unsafe_allow_html=True)
@@ -430,15 +481,6 @@ def exibir_processo(
             st.markdown('<span class="process-block-marker process-block-keywords"></span>', unsafe_allow_html=True)
             st.markdown("#### 🏷️ Palavras-chave")
             st.write(texto(processo.get("palavras_chave")) or "-")
-
-        with st.container(border=True):
-            st.markdown('<span class="process-block-marker process-block-documents"></span>', unsafe_allow_html=True)
-            exibir_documentos_processo(processo_id, contexto)
-
-        st.caption(
-            "Última atualização: "
-            f"{texto(processo.get('data_atualizacao')) or '-'}"
-        )
 
 
 marca_sidebar()
@@ -479,8 +521,8 @@ if pagina == "Detalhes do processo":
             st.rerun()
 
     cabecalho_pagina(
-        "Detalhes do processo",
-        "Consulta completa das informações e dos documentos do processo selecionado.",
+        "Painel executivo do processo",
+        "Situação atual, providências e documentos estratégicos em uma única consulta.",
     )
 
     if processo_detalhes is None:
