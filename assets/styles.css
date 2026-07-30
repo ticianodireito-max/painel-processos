@@ -1090,28 +1090,158 @@ small {
 [data-theme="dark"] .executive-process-subject { color: #dceafe; }
 [data-theme="dark"] .executive-process-meta,
 [data-theme="dark"] .executive-process-update,
-[data-theme="dark"] .executive-summary-label { color: #a9bfd8; }/* ==========================================
-   CAMPOS DE PESQUISA E TEXTO (MODO CLARO)
-   ========================================== */
+[data-theme="dark"] .executive-summary-label { color: #a9bfd8; }
 
-.stTextInput input,
-.stSearchbox input,
-input[type="text"] {
-    background-color: #ffffff !important;
-    color: #111827 !important;
-    caret-color: #111827 !important;
-    border: 1px solid #d1d5db !important;
-    border-radius: 10px !important;
+/* ======================================================================
+   CAMADA FINAL DE COMPATIBILIDADE DOS FORMULARIOS
+   Mantem os campos claros e legiveis independentemente da preferencia
+   de cor do sistema operacional ou do tema selecionado no Streamlit.
+   ====================================================================== */
+:root {
+    --form-background: #ffffff;
+    --form-background-disabled: #f1f5f9;
+    --form-text: #111827;
+    --form-muted: #64748b;
+    --form-label: #1e293b;
+    --form-border: #b9cde8;
+    --form-border-hover: #7da7d9;
+    --form-focus: #2563eb;
+    --form-focus-ring: rgba(37, 99, 235, 0.18);
+    --form-radius: 12px;
+    --form-shadow: 0 3px 10px rgba(30, 64, 175, 0.07);
 }
 
-.stTextInput input::placeholder,
-.stSearchbox input::placeholder {
-    color: #6b7280 !important;
+/* Rotulos e textos de ajuda. */
+.stApp [data-testid="stWidgetLabel"] p,
+.stApp [data-testid="stWidgetLabel"] span,
+.stApp .stTextInput label p,
+.stApp .stTextArea label p,
+.stApp .stSelectbox label p,
+.stApp .stMultiSelect label p,
+.stApp .stDateInput label p,
+.stApp .stNumberInput label p,
+.stApp .stFileUploader label p {
+    color: var(--form-label) !important;
     opacity: 1 !important;
 }
 
-.stTextInput input:focus,
-.stSearchbox input:focus {
-    border: 1px solid #2563eb !important;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+/* Superficie comum dos campos. */
+.stApp [data-baseweb="input"],
+.stApp [data-baseweb="textarea"],
+.stApp [data-baseweb="select"] > div,
+.stApp [data-testid="stDateInput"] [data-baseweb="input"],
+.stApp [data-testid="stNumberInput"] [data-baseweb="input"] {
+    background-color: var(--form-background) !important;
+    color: var(--form-text) !important;
+    border-color: var(--form-border) !important;
+    border-radius: var(--form-radius) !important;
+    box-shadow: var(--form-shadow) !important;
+}
+
+/* Texto digitado, valor selecionado, icones e cursor. */
+.stApp input,
+.stApp textarea,
+.stApp [data-baseweb="select"] input,
+.stApp [data-baseweb="select"] span,
+.stApp [data-baseweb="select"] div,
+.stApp [data-baseweb="select"] svg,
+.stApp [data-baseweb="input"] svg,
+.stApp [data-testid="stDateInput"] svg,
+.stApp [data-testid="stNumberInput"] svg {
+    color: var(--form-text) !important;
+    fill: currentColor !important;
+    caret-color: var(--form-text) !important;
+    -webkit-text-fill-color: var(--form-text) !important;
+    opacity: 1 !important;
+}
+
+/* Placeholder claramente distinguivel do valor preenchido. */
+.stApp input::placeholder,
+.stApp textarea::placeholder,
+.stApp [data-baseweb="select"] input::placeholder {
+    color: var(--form-muted) !important;
+    -webkit-text-fill-color: var(--form-muted) !important;
+    opacity: 1 !important;
+}
+
+/* Interacao. */
+.stApp [data-baseweb="input"]:hover,
+.stApp [data-baseweb="textarea"]:hover,
+.stApp [data-baseweb="select"] > div:hover {
+    border-color: var(--form-border-hover) !important;
+}
+
+.stApp [data-baseweb="input"]:focus-within,
+.stApp [data-baseweb="textarea"]:focus-within,
+.stApp [data-baseweb="select"] > div:focus-within,
+.stApp [data-testid="stDateInput"] [data-baseweb="input"]:focus-within,
+.stApp [data-testid="stNumberInput"] [data-baseweb="input"]:focus-within {
+    border-color: var(--form-focus) !important;
+    box-shadow: 0 0 0 3px var(--form-focus-ring), var(--form-shadow) !important;
+}
+
+/* Campos desabilitados continuam legiveis. */
+.stApp input:disabled,
+.stApp textarea:disabled,
+.stApp [aria-disabled="true"] [data-baseweb="select"] > div {
+    background-color: var(--form-background-disabled) !important;
+    color: #475569 !important;
+    -webkit-text-fill-color: #475569 !important;
+    opacity: 1 !important;
+}
+
+/* Menus abertos de selectbox, multiselect e date input. */
+[data-baseweb="popover"],
+[data-baseweb="menu"],
+[data-baseweb="calendar"] {
+    color: var(--form-text) !important;
+}
+
+[data-baseweb="popover"] > div,
+[data-baseweb="menu"],
+[data-baseweb="calendar"],
+ul[role="listbox"] {
+    background-color: #ffffff !important;
+    border-color: var(--form-border) !important;
+}
+
+li[role="option"],
+li[role="option"] span,
+ul[role="listbox"] li,
+ul[role="listbox"] span,
+[data-baseweb="calendar"] button,
+[data-baseweb="calendar"] div,
+[data-baseweb="calendar"] span {
+    color: var(--form-text) !important;
+    -webkit-text-fill-color: var(--form-text) !important;
+}
+
+li[role="option"]:hover,
+li[role="option"][aria-selected="true"] {
+    background-color: #eaf2ff !important;
+}
+
+/* Chips do multiselect. */
+.stApp [data-baseweb="tag"] {
+    background-color: #dfeeff !important;
+    border-color: #b4ceee !important;
+}
+
+.stApp [data-baseweb="tag"] span,
+.stApp [data-baseweb="tag"] svg {
+    color: #17406f !important;
+    fill: currentColor !important;
+    -webkit-text-fill-color: #17406f !important;
+}
+
+/* Area de upload. */
+.stApp [data-testid="stFileUploaderDropzone"] {
+    background-color: #f8fbff !important;
+    border-color: var(--form-border) !important;
+}
+
+.stApp [data-testid="stFileUploaderDropzone"] p,
+.stApp [data-testid="stFileUploaderDropzone"] span,
+.stApp [data-testid="stFileUploaderDropzone"] small {
+    color: var(--form-text) !important;
 }
