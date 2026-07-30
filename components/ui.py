@@ -6,14 +6,33 @@ from pathlib import Path
 import streamlit as st
 
 
-def carregar_estilos(caminho: str = "assets/styles.css") -> None:
-    """Carrega o CSS externo sem interromper o aplicativo se o arquivo faltar."""
-    arquivo = Path(caminho)
-    if not arquivo.exists():
-        return
+ARQUIVOS_CSS = (
+    "base.css",
+    "sidebar.css",
+    "dashboard.css",
+    "components.css",
+    "responsive.css",
+)
 
-    css = arquivo.read_text(encoding="utf-8")
-    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+
+def carregar_estilos(diretorio: str = "assets") -> None:
+    """Carrega os módulos CSS na ordem definida, sem interromper o app se algum faltar."""
+    pasta = Path(diretorio)
+    partes: list[str] = []
+
+    for nome in ARQUIVOS_CSS:
+        arquivo = pasta / nome
+        if arquivo.exists():
+            partes.append(arquivo.read_text(encoding="utf-8"))
+
+    # Compatibilidade com instalações antigas que ainda tenham apenas styles.css.
+    if not partes:
+        legado = pasta / "styles.css"
+        if legado.exists():
+            partes.append(legado.read_text(encoding="utf-8"))
+
+    if partes:
+        st.markdown(f"<style>{'\n'.join(partes)}</style>", unsafe_allow_html=True)
 
 
 def cabecalho_pagina(titulo: str, descricao: str | None = None) -> None:
