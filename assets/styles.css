@@ -324,3 +324,145 @@ hr {
         min-height: 96px;
     }
 }
+
+
+/* Dashboard moderno: escopo apenas para elementos personalizados e chaves conhecidas. */
+.dashboard-welcome {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin: -0.3rem 0 1.7rem;
+    padding: 1.35rem 1.5rem;
+    background:
+        linear-gradient(135deg,
+            color-mix(in srgb, var(--app-primary) 12%, var(--app-surface)),
+            var(--app-surface));
+    border: 1px solid var(--app-border);
+    border-radius: 18px;
+    box-shadow: var(--app-shadow-sm);
+}
+
+.dashboard-welcome strong {
+    display: block;
+    margin-top: 0.25rem;
+    color: var(--app-text);
+    font-size: 1.12rem;
+    letter-spacing: -0.015em;
+}
+
+.dashboard-welcome p {
+    margin: 0.35rem 0 0;
+    color: var(--app-muted);
+    font-size: 0.9rem;
+}
+
+.dashboard-kicker {
+    color: var(--app-primary);
+    font-size: 0.69rem;
+    font-weight: 800;
+    letter-spacing: 0.11em;
+}
+
+.dashboard-welcome-icon {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    flex: 0 0 auto;
+    border-radius: 16px;
+    background: var(--app-primary);
+    color: #ffffff;
+    font-size: 1.45rem;
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--app-primary) 28%, transparent);
+}
+
+.metric-card {
+    min-height: 158px;
+    padding: 1.25rem;
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.metric-card::after {
+    content: "";
+    position: absolute;
+    right: -28px;
+    bottom: -38px;
+    width: 104px;
+    height: 104px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--app-primary) 8%, transparent);
+    pointer-events: none;
+}
+
+.metric-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 14px;
+    font-size: 1.28rem;
+}
+
+.metric-content {
+    min-width: 0;
+}
+
+.metric-label {
+    margin-bottom: 0.45rem;
+    font-size: 0.79rem;
+    text-transform: uppercase;
+    letter-spacing: 0.055em;
+}
+
+.metric-value {
+    margin-top: 0;
+    font-size: 2.35rem;
+}
+
+.metric-description {
+    margin-top: 0.62rem;
+    color: var(--app-muted);
+    font-size: 0.78rem;
+    line-height: 1.35;
+}
+
+/* Os quatro botões imediatamente após os indicadores ficam visualmente mais discretos. */
+.st-key-abrir_todos_dashboard button,
+.st-key-abrir_urgentes_dashboard button,
+.st-key-abrir_altas_dashboard button,
+.st-key-abrir_pendencias_dashboard button {
+    min-height: 2.55rem;
+    margin-top: 0.45rem;
+    border-radius: 12px;
+}
+
+/* Campo de pesquisa do dashboard, sem alterar os demais formulários do sistema. */
+.st-key-pesquisa_dashboard [data-baseweb="input"] {
+    min-height: 3.2rem;
+    border-radius: 14px;
+    box-shadow: var(--app-shadow-sm);
+}
+
+.st-key-pesquisa_dashboard input {
+    font-size: 0.95rem;
+}
+
+/* Tabela de cadastros recentes com aparência de painel. */
+[data-testid="stDataFrame"] {
+    background: var(--app-surface);
+}
+
+@media (max-width: 900px) {
+    .dashboard-welcome {
+        align-items: flex-start;
+    }
+
+    .dashboard-welcome-icon {
+        width: 2.8rem;
+        height: 2.8rem;
+    }
+
+    .metric-card {
+        min-height: 132px;
+    }
+}
