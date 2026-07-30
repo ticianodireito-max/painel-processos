@@ -326,10 +326,6 @@ def exibir_processo(
     expandido: bool = False,
 ) -> None:
     processo_id = int(processo.get("id"))
-    chave_aberto = f"cartao_processo_aberto_{contexto}_{processo_id}"
-
-    if chave_aberto not in st.session_state:
-        st.session_state[chave_aberto] = expandido
 
     numero = texto(processo.get("numero")) or "Sem número"
     assunto = texto(processo.get("assunto")) or "Sem assunto"
@@ -362,15 +358,16 @@ def exibir_processo(
             st.caption(f"Situação: {situacao}")
 
         with coluna_acao:
-            rotulo = "Fechar" if st.session_state[chave_aberto] else "Abrir processo"
-            if st.button(
-                rotulo,
-                key=f"alternar_cartao_{contexto}_{processo_id}",
-                use_container_width=True,
-                type="primary" if not st.session_state[chave_aberto] else "secondary",
-            ):
-                st.session_state[chave_aberto] = not st.session_state[chave_aberto]
-                st.rerun()
+            if not expandido:
+                if st.button(
+                    "Abrir processo",
+                    key=f"abrir_cartao_{contexto}_{processo_id}",
+                    use_container_width=True,
+                    type="primary",
+                ):
+                    st.session_state.processo_em_detalhes = processo_id
+                    st.session_state.pagina_origem_detalhes = pagina
+                    st.rerun()
 
         coluna_responsavel, coluna_prazo, coluna_providencia = st.columns([1.4, 1.4, 2.6])
         with coluna_responsavel:
@@ -388,7 +385,7 @@ def exibir_processo(
             else:
                 st.write("—")
 
-        if not st.session_state[chave_aberto]:
+        if not expandido:
             return
 
         st.markdown('<div class="process-card-details-marker"></div>', unsafe_allow_html=True)
@@ -460,8 +457,42 @@ pagina_com_icone = st.sidebar.radio(
 )
 pagina = pagina_com_icone.split("  ", 1)[1]
 
+if "processo_em_detalhes" not in st.session_state:
+    st.session_state.processo_em_detalhes = None
 
-if pagina == "Dashboard":
+if st.session_state.processo_em_detalhes is not None:
+    pagina = "Detalhes do processo"
+
+
+if pagina == "Detalhes do processo":
+    processo_id_detalhes = int(st.session_state.processo_em_detalhes)
+    processo_detalhes = obter_processo(processo_id_detalhes)
+
+    coluna_voltar, coluna_espaco = st.columns([1.3, 5])
+    with coluna_voltar:
+        if st.button(
+            "← Voltar",
+            key="voltar_dos_detalhes",
+            use_container_width=True,
+        ):
+            st.session_state.processo_em_detalhes = None
+            st.rerun()
+
+    cabecalho_pagina(
+        "Detalhes do processo",
+        "Consulta completa das informações e dos documentos do processo selecionado.",
+    )
+
+    if processo_detalhes is None:
+        st.warning("O processo selecionado não foi encontrado.")
+    else:
+        exibir_processo(
+            processo_detalhes,
+            contexto=f"pagina_detalhes_{processo_id_detalhes}",
+            expandido=True,
+        )
+
+elif pagina == "Dashboard":
     cabecalho_pagina(
         "Processos Estratégicos",
         "Acompanhamento centralizado de prioridades, providências e movimentações relevantes.",
@@ -644,9 +675,6 @@ if pagina == "Dashboard":
 
         recentes = processos.head(10)
 
-        if "processo_recente_aberto" not in st.session_state:
-            st.session_state.processo_recente_aberto = None
-
         cabecalho_recente = st.columns([1.55, 4.0, 0.75, 1.0, 1.45, 1.55])
         cabecalho_recente[0].markdown("**Número do Processo**")
         cabecalho_recente[1].markdown("**Assunto**")
@@ -668,7 +696,8 @@ if pagina == "Dashboard":
                     use_container_width=True,
                     help="Abrir as informações completas deste processo",
                 ):
-                    st.session_state.processo_recente_aberto = processo_id
+                    st.session_state.processo_em_detalhes = processo_id
+                    st.session_state.pagina_origem_detalhes = "Dashboard"
                     st.rerun()
 
             colunas_linha[1].write(texto(processo.get("assunto")) or "—")
@@ -677,36 +706,6 @@ if pagina == "Dashboard":
             colunas_linha[4].write(texto(processo.get("responsavel")) or "—")
             colunas_linha[5].write(texto(processo.get("data_atualizacao")) or "—")
 
-        processo_recente_id = st.session_state.processo_recente_aberto
-        if processo_recente_id is not None:
-            processo_recente = obter_processo(int(processo_recente_id))
-
-            st.markdown("---")
-            coluna_titulo_recente, coluna_fechar_recente = st.columns([5, 1])
-
-            with coluna_titulo_recente:
-                titulo_secao(
-                    "Processo selecionado",
-                    "Informações completas do cadastro recente.",
-                )
-
-            with coluna_fechar_recente:
-                if st.button(
-                    "Fechar",
-                    key="fechar_processo_recente",
-                    use_container_width=True,
-                ):
-                    st.session_state.processo_recente_aberto = None
-                    st.rerun()
-
-            if processo_recente is None:
-                st.warning("O processo selecionado não foi encontrado.")
-            else:
-                exibir_processo(
-                    processo_recente,
-                    contexto=f"dashboard_recente_selecionado_{processo_recente_id}",
-                    expandido=True,
-                )
 
 
 elif pagina == "Cadastrar processo":
