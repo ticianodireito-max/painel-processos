@@ -235,20 +235,118 @@ if pagina == "Dashboard":
 
         urgentes = processos[processos["prioridade"].eq("Urgente")]
 
+                if "filtro_cartao_dashboard" not in st.session_state:
+            st.session_state.filtro_cartao_dashboard = None
+
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            cartao_indicador("Processos cadastrados", total, "□", "primary")
+            cartao_indicador(
+                "Processos cadastrados",
+                total,
+                "□",
+                "primary",
+            )
+
+            if st.button(
+                "Abrir lista",
+                key="abrir_todos_dashboard",
+                use_container_width=True,
+            ):
+                st.session_state.filtro_cartao_dashboard = "todos"
+
         with col2:
-            cartao_indicador("Urgentes", len(urgentes), "!", "danger")
+            cartao_indicador(
+                "Urgentes",
+                len(urgentes),
+                "!",
+                "danger",
+            )
+
+            if st.button(
+                "Abrir lista",
+                key="abrir_urgentes_dashboard",
+                use_container_width=True,
+            ):
+                st.session_state.filtro_cartao_dashboard = "urgentes"
+
         with col3:
             cartao_indicador(
-                "Alta prioridade", len(prioridades_altas), "↑", "warning"
+                "Alta prioridade",
+                len(prioridades_altas),
+                "↑",
+                "warning",
             )
+
+            if st.button(
+                "Abrir lista",
+                key="abrir_altas_dashboard",
+                use_container_width=True,
+            ):
+                st.session_state.filtro_cartao_dashboard = "altas"
+
         with col4:
             cartao_indicador(
-                "Providências pendentes", len(pendencias), "✓", "success"
+                "Providências pendentes",
+                len(pendencias),
+                "✓",
+                "success",
             )
+
+            if st.button(
+                "Abrir lista",
+                key="abrir_pendencias_dashboard",
+                use_container_width=True,
+            ):
+                st.session_state.filtro_cartao_dashboard = "pendencias"
+
+        filtro_cartao = st.session_state.filtro_cartao_dashboard
+
+        if filtro_cartao is not None:
+            if filtro_cartao == "todos":
+                titulo_lista = "Todos os processos cadastrados"
+                processos_filtrados = processos
+
+            elif filtro_cartao == "urgentes":
+                titulo_lista = "Processos urgentes"
+                processos_filtrados = urgentes
+
+            elif filtro_cartao == "altas":
+                titulo_lista = "Processos de alta prioridade"
+                processos_filtrados = prioridades_altas
+
+            else:
+                titulo_lista = "Processos com providências pendentes"
+                processos_filtrados = pendencias
+
+            st.markdown("---")
+
+            coluna_titulo, coluna_fechar = st.columns([5, 1])
+
+            with coluna_titulo:
+                titulo_secao(
+                    titulo_lista,
+                    f"{len(processos_filtrados)} processo(s) encontrado(s).",
+                )
+
+            with coluna_fechar:
+                if st.button(
+                    "Fechar lista",
+                    key="fechar_lista_dashboard",
+                    use_container_width=True,
+                ):
+                    st.session_state.filtro_cartao_dashboard = None
+                    st.rerun()
+
+            if processos_filtrados.empty:
+                st.info(
+                    "Não há processos cadastrados nessa categoria."
+                )
+            else:
+                for _, processo in processos_filtrados.iterrows():
+                    exibir_processo(processo)
+
+            st.markdown("---")
 
         titulo_secao(
             "Pesquisa rápida",
