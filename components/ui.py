@@ -95,3 +95,24 @@ def marca_sidebar() -> None:
         """,
         unsafe_allow_html=True,
     )
+def cabecalho_formulario(
+    titulo: str,
+    descricao: str | None = None,
+) -> None:
+    descricao_html = (
+        f'<p class="form-section-description">{escape(descricao)}</p>'
+        if descricao
+        else ""
+    )
+
+    st.markdown(
+        f"""
+        <div class="form-section-heading">
+            <div class="form-section-title">
+                {escape(titulo)}
+            </div>
+            {descricao_html}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
