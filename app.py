@@ -426,8 +426,22 @@ pagina = pagina_com_icone.split("  ", 1)[1]
 
 if pagina == "Dashboard":
     cabecalho_pagina(
-        "Processos Estratégicos - SUBPGMA",
-        "Painel de acompanhamento dos processos estratégicos, prioridades e providências pendentes.",
+        "Processos Estratégicos",
+        "Acompanhamento centralizado de prioridades, providências e movimentações relevantes.",
+    )
+
+    st.markdown(
+        """
+        <div class="dashboard-welcome">
+            <div>
+                <span class="dashboard-kicker">VISÃO GERAL</span>
+                <strong>Panorama dos processos estratégicos</strong>
+                <p>Consulte os indicadores, localize registros e acompanhe os cadastros mais recentes.</p>
+            </div>
+            <div class="dashboard-welcome-icon">⚖</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
     )
 
     processos = listar_processos()
@@ -459,8 +473,9 @@ if pagina == "Dashboard":
             cartao_indicador(
                 "Processos cadastrados",
                 total,
-                "□",
+                "▦",
                 "primary",
+                "Todos os registros estratégicos",
             )
             if st.button(
                 "Abrir lista",
@@ -475,6 +490,7 @@ if pagina == "Dashboard":
                 len(urgentes),
                 "!",
                 "danger",
+                "Necessitam atuação imediata",
             )
             if st.button(
                 "Abrir lista",
@@ -489,6 +505,7 @@ if pagina == "Dashboard":
                 len(prioridades_altas),
                 "↑",
                 "warning",
+                "Demandas de atenção prioritária",
             )
             if st.button(
                 "Abrir lista",
@@ -503,6 +520,7 @@ if pagina == "Dashboard":
                 len(pendencias),
                 "✓",
                 "success",
+                "Medidas ainda não concluídas",
             )
             if st.button(
                 "Abrir lista",
@@ -587,8 +605,24 @@ if pagina == "Dashboard":
             "Acompanhe os dez registros mais recentes do sistema.",
         )
 
-        for _, processo in processos.head(10).iterrows():
-            exibir_processo(processo, contexto="dashboard_recentes")
+        recentes = processos.head(10)
+        colunas_recentes = [
+            "numero",
+            "assunto",
+            "prioridade",
+            "situacao",
+            "responsavel",
+            "data_atualizacao",
+        ]
+        st.dataframe(
+            preparar_tabela(recentes, colunas_recentes),
+            use_container_width=True,
+            hide_index=True,
+        )
+
+        with st.expander("Ver detalhes dos cadastros recentes", expanded=False):
+            for _, processo in recentes.iterrows():
+                exibir_processo(processo, contexto="dashboard_recentes")
 
 
 elif pagina == "Cadastrar processo":
