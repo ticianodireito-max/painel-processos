@@ -1269,3 +1269,78 @@ li[role="option"][aria-selected="true"] {
 .stApp [data-testid="stFileUploaderDropzone"] small {
     color: var(--form-text) !important;
 }
+
+/* ======================================================================
+   SOBRESCRITA FINAL: CAMPOS SEMPRE BRANCOS COM TEXTO PRETO
+   Aplica-se aos modos light, dark e system.
+   ====================================================================== */
+.stApp [data-baseweb="input"],
+.stApp [data-baseweb="textarea"],
+.stApp [data-baseweb="select"] > div,
+.stApp [data-testid="stDateInput"] [data-baseweb="input"],
+.stApp [data-testid="stNumberInput"] [data-baseweb="input"],
+.stApp input,
+.stApp textarea {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+    caret-color: #111827 !important;
+    border-color: #cbd5e1 !important;
+}
+
+.stApp input::placeholder,
+.stApp textarea::placeholder,
+.stApp [data-baseweb="select"] input::placeholder {
+    color: #64748b !important;
+    -webkit-text-fill-color: #64748b !important;
+    opacity: 1 !important;
+}
+
+.stApp [data-baseweb="select"] span,
+.stApp [data-baseweb="select"] div,
+.stApp [data-baseweb="select"] input,
+.stApp [data-baseweb="select"] svg,
+.stApp [data-baseweb="input"] svg,
+.stApp [data-testid="stDateInput"] svg,
+.stApp [data-testid="stNumberInput"] svg {
+    color: #111827 !important;
+    fill: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+    opacity: 1 !important;
+}
+
+/* Menus suspensos e calendario, inclusive quando renderizados fora de .stApp. */
+[data-baseweb="popover"] > div,
+[data-baseweb="menu"],
+[data-baseweb="calendar"],
+ul[role="listbox"] {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    border-color: #cbd5e1 !important;
+}
+
+li[role="option"],
+li[role="option"] span,
+ul[role="listbox"] li,
+ul[role="listbox"] span,
+[data-baseweb="calendar"] button,
+[data-baseweb="calendar"] div,
+[data-baseweb="calendar"] span {
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+}
+
+li[role="option"]:hover,
+li[role="option"][aria-selected="true"] {
+    background-color: #eaf2ff !important;
+}
+
+/* Campos desabilitados continuam claros e legiveis. */
+.stApp input:disabled,
+.stApp textarea:disabled,
+.stApp [aria-disabled="true"] [data-baseweb="select"] > div {
+    background-color: #f1f5f9 !important;
+    color: #475569 !important;
+    -webkit-text-fill-color: #475569 !important;
+    opacity: 1 !important;
+}
