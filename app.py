@@ -39,6 +39,105 @@ st.set_page_config(
 
 carregar_estilos()
 
+# Ajustes visuais específicos do módulo documental. A aplicação usa fundo claro,
+# portanto esta área recebe contraste explícito para evitar texto branco em superfícies claras.
+st.markdown(
+    """
+    <style>
+    div[data-testid="stTabs"] button[role="tab"],
+    div[data-testid="stTabs"] button[role="tab"] * {
+        color: #344054 !important;
+        opacity: 1 !important;
+    }
+
+    div[data-testid="stTabs"] button[role="tab"][aria-selected="true"],
+    div[data-testid="stTabs"] button[role="tab"][aria-selected="true"] * {
+        color: #d92d20 !important;
+        font-weight: 700 !important;
+    }
+
+    div[data-testid="stTabs"] [data-baseweb="tab-panel"] {
+        background: #ffffff !important;
+        color: #171a21 !important;
+        padding: 1rem 0.25rem 0.25rem !important;
+    }
+
+    div[data-testid="stTabs"] [data-baseweb="tab-panel"] p,
+    div[data-testid="stTabs"] [data-baseweb="tab-panel"] label,
+    div[data-testid="stTabs"] [data-baseweb="tab-panel"] span,
+    div[data-testid="stTabs"] [data-baseweb="tab-panel"] small,
+    div[data-testid="stTabs"] [data-baseweb="tab-panel"] div {
+        color: #171a21;
+    }
+
+    div[data-testid="stTabs"] div[data-testid="stForm"] {
+        background: #ffffff !important;
+        color: #171a21 !important;
+        border: 1px solid #d0d5dd !important;
+        box-shadow: none !important;
+    }
+
+    div[data-testid="stTabs"] div[data-testid="stForm"] label,
+    div[data-testid="stTabs"] div[data-testid="stForm"] label *,
+    div[data-testid="stTabs"] div[data-testid="stForm"] p,
+    div[data-testid="stTabs"] div[data-testid="stForm"] span {
+        color: #171a21 !important;
+        opacity: 1 !important;
+    }
+
+    div[data-testid="stTabs"] div[data-testid="stForm"] input,
+    div[data-testid="stTabs"] div[data-testid="stForm"] textarea {
+        background: #ffffff !important;
+        color: #171a21 !important;
+        -webkit-text-fill-color: #171a21 !important;
+    }
+
+    div[data-testid="stTabs"] div[data-testid="stForm"] input::placeholder,
+    div[data-testid="stTabs"] div[data-testid="stForm"] textarea::placeholder {
+        color: #667085 !important;
+        opacity: 1 !important;
+    }
+
+    div[data-testid="stTabs"] div[data-testid="stFileUploader"] section {
+        background: #f8fafc !important;
+        color: #171a21 !important;
+        border-color: #98a2b3 !important;
+    }
+
+    div[data-testid="stTabs"] div[data-testid="stFileUploader"] section * {
+        color: #171a21 !important;
+        opacity: 1 !important;
+    }
+    div[data-testid="stTabs"] details,
+    div[data-testid="stTabs"] details > summary,
+    div[data-testid="stTabs"] details > div {
+        background: #ffffff !important;
+        color: #171a21 !important;
+    }
+
+    div[data-testid="stTabs"] details > summary * {
+        color: #171a21 !important;
+        opacity: 1 !important;
+    }
+
+    div[data-testid="stTabs"] [data-baseweb="input"] > div,
+    div[data-testid="stTabs"] [data-baseweb="textarea"] > div,
+    div[data-testid="stTabs"] [data-baseweb="base-input"] {
+        background: #ffffff !important;
+        color: #171a21 !important;
+    }
+
+    div[data-testid="stTabs"] input,
+    div[data-testid="stTabs"] textarea {
+        background: #ffffff !important;
+        color: #171a21 !important;
+        -webkit-text-fill-color: #171a21 !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 criar_banco()
 
 AREAS = [
@@ -219,40 +318,48 @@ def exibir_categoria_documental(processo_id: int, categoria: str) -> None:
 
             st.markdown("---")
 
-    st.markdown("##### Adicionar PDF")
-    with st.form(f"form_{chave_base}", clear_on_submit=True):
-        titulo_documento = st.text_input(
-            "Título do documento *",
-            key=f"titulo_{chave_base}",
-            placeholder="Ex.: Decisão liminar de 25/06/2026",
-        )
-        descricao_documento = st.text_area(
-            "Descrição",
-            key=f"descricao_{chave_base}",
-            placeholder="Breve indicação do conteúdo ou da relevância do documento.",
-            height=80,
-        )
-        informar_data = st.checkbox(
-            "Informar a data do documento",
-            key=f"informar_data_{chave_base}",
-        )
-        data_do_documento = st.date_input(
-            "Data do documento",
-            value=date.today(),
-            key=f"data_{chave_base}",
-            disabled=not informar_data,
-            format="DD/MM/YYYY",
-        )
-        arquivo = st.file_uploader(
-            "Arquivo PDF *",
-            type=["pdf"],
-            accept_multiple_files=False,
-            key=f"arquivo_{chave_base}",
-        )
-        enviar_documento = st.form_submit_button(
-            "Adicionar documento",
-            type="primary",
-        )
+    enviar_documento = False
+    titulo_documento = ""
+    descricao_documento = ""
+    informar_data = False
+    data_do_documento = date.today()
+    arquivo = None
+
+    with st.expander("➕ Adicionar PDF", expanded=False):
+        st.caption("O formulário permanece recolhido até esta seção ser aberta.")
+        with st.form(f"form_{chave_base}", clear_on_submit=True):
+            titulo_documento = st.text_input(
+                "Título do documento *",
+                key=f"titulo_{chave_base}",
+                placeholder="Ex.: Decisão liminar de 25/06/2026",
+            )
+            descricao_documento = st.text_area(
+                "Descrição",
+                key=f"descricao_{chave_base}",
+                placeholder="Breve indicação do conteúdo ou da relevância do documento.",
+                height=80,
+            )
+            informar_data = st.checkbox(
+                "Informar a data do documento",
+                key=f"informar_data_{chave_base}",
+            )
+            data_do_documento = st.date_input(
+                "Data do documento",
+                value=date.today(),
+                key=f"data_{chave_base}",
+                disabled=not informar_data,
+                format="DD/MM/YYYY",
+            )
+            arquivo = st.file_uploader(
+                "Arquivo PDF *",
+                type=["pdf"],
+                accept_multiple_files=False,
+                key=f"arquivo_{chave_base}",
+            )
+            enviar_documento = st.form_submit_button(
+                "Adicionar documento",
+                type="primary",
+            )
 
     if enviar_documento:
         if not titulo_documento.strip():
