@@ -1090,4 +1090,28 @@ small {
 [data-theme="dark"] .executive-process-subject { color: #dceafe; }
 [data-theme="dark"] .executive-process-meta,
 [data-theme="dark"] .executive-process-update,
-[data-theme="dark"] .executive-summary-label { color: #a9bfd8; }
+[data-theme="dark"] .executive-summary-label { color: #a9bfd8; }/* ==========================================
+   CAMPOS DE PESQUISA E TEXTO (MODO CLARO)
+   ========================================== */
+
+.stTextInput input,
+.stSearchbox input,
+input[type="text"] {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    caret-color: #111827 !important;
+    border: 1px solid #d1d5db !important;
+    border-radius: 10px !important;
+}
+
+.stTextInput input::placeholder,
+.stSearchbox input::placeholder {
+    color: #6b7280 !important;
+    opacity: 1 !important;
+}
+
+.stTextInput input:focus,
+.stSearchbox input:focus {
+    border: 1px solid #2563eb !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
