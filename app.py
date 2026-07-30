@@ -707,43 +707,6 @@ elif pagina == "Dashboard":
                 for _, processo in resultados_dashboard.head(10).iterrows():
                     exibir_processo(processo, contexto="dashboard_pesquisa")
 
-        titulo_secao(
-            "Cadastros recentes",
-            "Acompanhe os dez registros mais recentes do sistema.",
-        )
-
-        recentes = processos.head(10)
-
-        cabecalho_recente = st.columns([1.55, 4.0, 0.75, 1.0, 1.45, 1.55])
-        cabecalho_recente[0].markdown("**Número do Processo**")
-        cabecalho_recente[1].markdown("**Assunto**")
-        cabecalho_recente[2].markdown("**Prioridade**")
-        cabecalho_recente[3].markdown("**Situação**")
-        cabecalho_recente[4].markdown("**Procurador Responsável**")
-        cabecalho_recente[5].markdown("**Última Atualização**")
-
-        st.markdown("---")
-
-        for _, processo in recentes.iterrows():
-            processo_id = int(processo["id"])
-            colunas_linha = st.columns([1.55, 4.0, 0.75, 1.0, 1.45, 1.55])
-
-            with colunas_linha[0]:
-                if st.button(
-                    texto(processo.get("numero")) or "Sem número",
-                    key=f"abrir_processo_recente_{processo_id}",
-                    use_container_width=True,
-                    help="Abrir as informações completas deste processo",
-                ):
-                    st.session_state.processo_em_detalhes = processo_id
-                    st.session_state.pagina_origem_detalhes = "Dashboard"
-                    st.rerun()
-
-            colunas_linha[1].write(texto(processo.get("assunto")) or "—")
-            colunas_linha[2].write(texto(processo.get("prioridade")) or "—")
-            colunas_linha[3].write(texto(processo.get("situacao")) or "—")
-            colunas_linha[4].write(texto(processo.get("responsavel")) or "—")
-            colunas_linha[5].write(texto(processo.get("data_atualizacao")) or "—")
 
 
 
