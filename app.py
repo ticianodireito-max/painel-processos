@@ -394,37 +394,49 @@ def exibir_processo(
         st.markdown('<div class="process-card-details-marker"></div>', unsafe_allow_html=True)
         st.markdown("---")
 
-        col1, col2 = st.columns(2)
+        with st.container(border=True):
+            st.markdown('<span class="process-block-marker process-block-info"></span>', unsafe_allow_html=True)
+            st.markdown("#### 📌 Informações gerais")
+            col1, col2 = st.columns(2)
 
-        col1.write(f"**Área:** {texto(processo.get('area')) or '-'}")
-        col1.write(f"**Classe:** {texto(processo.get('classe')) or '-'}")
-        col1.write(f"**Autor:** {texto(processo.get('autor')) or '-'}")
-        col1.write(f"**Réu:** {texto(processo.get('reu')) or '-'}")
-        col1.write(f"**Responsável:** {responsavel}")
+            col1.write(f"**Área:** {texto(processo.get('area')) or '-'}")
+            col1.write(f"**Classe:** {texto(processo.get('classe')) or '-'}")
+            col1.write(f"**Autor:** {texto(processo.get('autor')) or '-'}")
+            col1.write(f"**Réu:** {texto(processo.get('reu')) or '-'}")
+            col1.write(f"**Responsável:** {responsavel}")
 
-        col2.write(f"**Prioridade:** {prioridade}")
-        col2.write(f"**Situação:** {situacao}")
-        col2.write(f"**Nível de acesso:** {texto(processo.get('nivel_acesso')) or '-'}")
-        col2.write(f"**Órgão julgador:** {texto(processo.get('orgao_julgador')) or '-'}")
-        col2.write(f"**Relator:** {texto(processo.get('relator')) or '-'}")
+            col2.write(f"**Prioridade:** {prioridade}")
+            col2.write(f"**Situação:** {situacao}")
+            col2.write(f"**Nível de acesso:** {texto(processo.get('nivel_acesso')) or '-'}")
+            col2.write(f"**Órgão julgador:** {texto(processo.get('orgao_julgador')) or '-'}")
+            col2.write(f"**Relator:** {texto(processo.get('relator')) or '-'}")
 
-        st.markdown("#### Resumo executivo")
-        st.write(texto(processo.get("resumo_executivo")) or "-")
+        with st.container(border=True):
+            st.markdown('<span class="process-block-marker process-block-executive"></span>', unsafe_allow_html=True)
+            st.markdown("#### 📋 Resumo executivo")
+            st.write(texto(processo.get("resumo_executivo")) or "-")
 
-        st.markdown("#### Providência pendente")
-        st.write(providencia or "-")
+            col_providencia, col_prazo = st.columns([2, 1])
+            with col_providencia:
+                st.caption("PROVIDÊNCIA PENDENTE")
+                st.write(providencia or "-")
+            with col_prazo:
+                st.caption("PRAZO RELEVANTE")
+                st.write(prazo)
 
-        st.markdown("#### Prazo relevante")
-        st.write(prazo)
+        with st.container(border=True):
+            st.markdown('<span class="process-block-marker process-block-legal"></span>', unsafe_allow_html=True)
+            st.markdown("#### ⚖️ Resumo jurídico")
+            st.write(texto(processo.get("resumo")) or "-")
 
-        st.markdown("#### Resumo jurídico")
-        st.write(texto(processo.get("resumo")) or "-")
+        with st.container(border=True):
+            st.markdown('<span class="process-block-marker process-block-keywords"></span>', unsafe_allow_html=True)
+            st.markdown("#### 🏷️ Palavras-chave")
+            st.write(texto(processo.get("palavras_chave")) or "-")
 
-        st.markdown("#### Palavras-chave")
-        st.write(texto(processo.get("palavras_chave")) or "-")
-
-        st.markdown("---")
-        exibir_documentos_processo(processo_id, contexto)
+        with st.container(border=True):
+            st.markdown('<span class="process-block-marker process-block-documents"></span>', unsafe_allow_html=True)
+            exibir_documentos_processo(processo_id, contexto)
 
         st.caption(
             "Última atualização: "
