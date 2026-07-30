@@ -116,11 +116,19 @@ def indice_opcao(opcoes: list[str], valor: str, padrao: int = 0) -> int:
         return padrao
 
 
-def exibir_processo(processo: pd.Series) -> None:
+def exibir_processo(
+    processo: pd.Series,
+    mostrar_providencia_no_titulo: bool = False,
+) -> None:
     titulo = (
         f"{texto(processo.get('numero'))} — "
         f"{texto(processo.get('assunto')) or 'Sem assunto'}"
     )
+
+    if mostrar_providencia_no_titulo:
+        providencia = texto(processo.get("providencia_pendente")).strip()
+        if providencia:
+            titulo += f" | Providência: {providencia}"
 
     with st.expander(titulo):
         col1, col2 = st.columns(2)
@@ -334,7 +342,12 @@ if pagina == "Dashboard":
                 st.info("Não há processos cadastrados nessa categoria.")
             else:
                 for _, processo in processos_filtrados.iterrows():
-                    exibir_processo(processo)
+                    exibir_processo(
+                        processo,
+                        mostrar_providencia_no_titulo=(
+                            filtro_cartao == "pendencias"
+                        ),
+                    )
 
             st.markdown("---")
 
