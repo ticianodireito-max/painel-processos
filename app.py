@@ -4,7 +4,6 @@ import pandas as pd
 import streamlit as st
 
 from components.ui import (
-    cabecalho_formulario,
     cabecalho_pagina,
     carregar_estilos,
     cartao_indicador,
@@ -290,15 +289,7 @@ elif pagina == "Cadastrar processo":
         "formulario_cadastro",
         clear_on_submit=True,
     ):
-        cabecalho_formulario(
-            "Identificação do processo",
-            "Registre os dados essenciais para identificação e localização do feito.",
-        )
-
-        numero = st.text_input(
-            "Número do processo *",
-            placeholder="Ex.: 0001234-56.2026.8.11.0000",
-        )
+        numero = st.text_input("Número do processo *")
 
         col1, col2 = st.columns(2)
 
@@ -321,15 +312,9 @@ elif pagina == "Cadastrar processo":
         orgao_julgador = col5.text_input("Órgão julgador")
         relator = col6.text_input("Relator")
 
-        cabecalho_formulario(
-            "Conteúdo jurídico",
-            "Sintetize o objeto da demanda e indique os principais temas envolvidos.",
-        )
-
         resumo = st.text_area(
             "Resumo jurídico do processo",
-            height=160,
-            placeholder="Apresente uma síntese objetiva da controvérsia, das teses relevantes e do estado atual do processo.",
+            height=140,
         )
 
         palavras_chave = st.text_area(
@@ -339,9 +324,8 @@ elif pagina == "Cadastrar processo":
             ),
         )
 
-        cabecalho_formulario(
-            "Acompanhamento gerencial",
-            "Defina prioridade, situação, responsabilidade e providências para subsidiar a gestão estratégica.",
+        st.markdown(
+            "### Informações para acompanhamento gerencial"
         )
 
         col7, col8 = st.columns(2)
@@ -390,12 +374,9 @@ elif pagina == "Cadastrar processo":
             placeholder="Ex.: 05/08/2026 — contestação",
         )
 
-        st.caption("* Campo de preenchimento obrigatório.")
-
         enviar = st.form_submit_button(
             "Cadastrar processo",
             type="primary",
-            use_container_width=True,
         )
 
     if enviar:
@@ -461,11 +442,6 @@ elif pagina == "Editar processo":
             for _, linha in processos.iterrows()
         }
 
-        titulo_secao(
-            "Seleção do processo",
-            "Escolha o registro que será atualizado.",
-        )
-
         processo_escolhido = st.selectbox(
             "Selecione o processo",
             list(opcoes_processos.keys()),
@@ -478,11 +454,6 @@ elif pagina == "Editar processo":
             st.error("Processo não encontrado.")
         else:
             with st.form("formulario_edicao"):
-                cabecalho_formulario(
-                    "Identificação do processo",
-                    "Atualize os dados essenciais de identificação e localização do feito.",
-                )
-
                 numero = st.text_input(
                     "Número do processo *",
                     value=texto(processo["numero"]),
@@ -535,11 +506,6 @@ elif pagina == "Editar processo":
                     value=texto(processo["relator"]),
                 )
 
-                cabecalho_formulario(
-                    "Conteúdo jurídico",
-                    "Revise a síntese da controvérsia e os temas relevantes do processo.",
-                )
-
                 resumo = st.text_area(
                     "Resumo jurídico do processo",
                     value=texto(processo["resumo"]),
@@ -553,9 +519,8 @@ elif pagina == "Editar processo":
                     ),
                 )
 
-                cabecalho_formulario(
-                    "Acompanhamento gerencial",
-                    "Atualize prioridade, situação, responsabilidade e providências pendentes.",
+                st.markdown(
+                    "### Informações para acompanhamento gerencial"
                 )
 
                 col7, col8 = st.columns(2)
@@ -619,12 +584,9 @@ elif pagina == "Editar processo":
                     ),
                 )
 
-                st.caption("* Campo de preenchimento obrigatório.")
-
                 salvar = st.form_submit_button(
                     "Salvar alterações",
                     type="primary",
-                    use_container_width=True,
                 )
 
             if salvar:
