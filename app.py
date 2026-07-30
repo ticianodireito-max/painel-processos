@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from datetime import date
+
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
 from components.ui import (
     cabecalho_pagina,
@@ -13,11 +16,16 @@ from components.ui import (
 
 from database import (
     atualizar_processo,
+    cadastrar_documento,
     cadastrar_processo,
+    criar_url_documento,
     criar_banco,
+    excluir_documento,
+    listar_documentos,
     listar_processos,
     obter_processo,
     pesquisar_processos,
+    DocumentoInvalidoError,
     ProcessoDuplicadoError,
 )
 
@@ -116,6 +124,189 @@ def indice_opcao(opcoes: list[str], valor: str, padrao: int = 0) -> int:
         return padrao
 
 
+
+CATEGORIAS_DOCUMENTAIS = [
+    ("decisao", "📑 Decisões relevantes"),
+    ("peca", "📄 Peças processuais relevantes"),
+    ("outro", "📎 Outros documentos"),
+]
+
+
+def formatar_tamanho(tamanho_bytes) -> str:
+    try:
+        tamanho = int(tamanho_bytes or 0)
+    except (TypeError, ValueError):
+        return "—"
+
+    if tamanho < 1024:
+        return f"{tamanho} B"
+    if tamanho < 1024 * 1024:
+        return f"{tamanho / 1024:.1f} KB"
+    return f"{tamanho / (1024 * 1024):.1f} MB"
+
+
+def exibir_categoria_documental(processo_id: int, categoria: str) -> None:
+    chave_base = f"documentos_{processo_id}_{categoria}"
+    documentos = listar_documentos(processo_id, categoria)
+
+    if documentos.empty:
+        st.caption("Nenhum documento cadastrado nesta categoria.")
+    else:
+        for _, documento in documentos.iterrows():
+            documento_id = int(documento["id"])
+            titulo_documento = texto(documento.get("titulo")) or texto(
+                documento.get("nome_arquivo")
+            )
+            data_documento = texto(documento.get("data_documento"))
+            descricao = texto(documento.get("descricao"))
+            nome_arquivo = texto(documento.get("nome_arquivo"))
+            caminho = texto(documento.get("caminho_storage"))
+
+            st.markdown(f"**{titulo_documento}**")
+
+            detalhes = []
+            if data_documento:
+                detalhes.append(f"Data: {data_documento}")
+            if nome_arquivo:
+                detalhes.append(nome_arquivo)
+            detalhes.append(formatar_tamanho(documento.get("tamanho_bytes")))
+            st.caption(" · ".join(detalhes))
+
+            if descricao:
+                st.write(descricao)
+
+            coluna_abrir, coluna_visualizar, coluna_excluir = st.columns([1, 1, 1])
+            url = criar_url_documento(caminho)
+
+            with coluna_abrir:
+                if url:
+                    st.link_button(
+                        "Abrir PDF",
+                        url,
+                        use_container_width=True,
+                    )
+                else:
+                    st.button(
+                        "PDF indisponível",
+                        key=f"indisponivel_{documento_id}",
+                        disabled=True,
+                        use_container_width=True,
+                    )
+
+            with coluna_visualizar:
+                chave_visualizador = f"visualizar_pdf_{documento_id}"
+                if st.button(
+                    "Visualizar aqui",
+                    key=f"botao_{chave_visualizador}",
+                    use_container_width=True,
+                ):
+                    st.session_state[chave_visualizador] = not st.session_state.get(
+                        chave_visualizador, False
+                    )
+
+            with coluna_excluir:
+                if st.button(
+                    "Excluir",
+                    key=f"excluir_documento_{documento_id}",
+                    use_container_width=True,
+                ):
+                    excluir_documento(documento_id, caminho)
+                    st.success("Documento excluído.")
+                    st.rerun()
+
+            if st.session_state.get(f"visualizar_pdf_{documento_id}") and url:
+                components.iframe(url, height=720, scrolling=True)
+
+            st.markdown("---")
+
+    st.markdown("##### Adicionar PDF")
+    with st.form(f"form_{chave_base}", clear_on_submit=True):
+        titulo_documento = st.text_input(
+            "Título do documento *",
+            key=f"titulo_{chave_base}",
+            placeholder="Ex.: Decisão liminar de 25/06/2026",
+        )
+        descricao_documento = st.text_area(
+            "Descrição",
+            key=f"descricao_{chave_base}",
+            placeholder="Breve indicação do conteúdo ou da relevância do documento.",
+            height=80,
+        )
+        informar_data = st.checkbox(
+            "Informar a data do documento",
+            key=f"informar_data_{chave_base}",
+        )
+        data_do_documento = st.date_input(
+            "Data do documento",
+            value=date.today(),
+            key=f"data_{chave_base}",
+            disabled=not informar_data,
+            format="DD/MM/YYYY",
+        )
+        arquivo = st.file_uploader(
+            "Arquivo PDF *",
+            type=["pdf"],
+            accept_multiple_files=False,
+            key=f"arquivo_{chave_base}",
+        )
+        enviar_documento = st.form_submit_button(
+            "Adicionar documento",
+            type="primary",
+        )
+
+    if enviar_documento:
+        if not titulo_documento.strip():
+            st.error("Informe o título do documento.")
+        elif arquivo is None:
+            st.error("Selecione um arquivo PDF.")
+        else:
+            try:
+                cadastrar_documento(
+                    processo_id=processo_id,
+                    categoria=categoria,
+                    titulo=titulo_documento,
+                    descricao=descricao_documento,
+                    data_documento=(
+                        data_do_documento.isoformat() if informar_data else None
+                    ),
+                    nome_arquivo=arquivo.name,
+                    conteudo=arquivo.getvalue(),
+                )
+                st.success("Documento adicionado com sucesso.")
+                st.rerun()
+            except DocumentoInvalidoError as erro:
+                st.error(str(erro))
+            except Exception as erro:
+                st.error(f"Não foi possível adicionar o documento: {erro}")
+
+def exibir_documentos_processo(processo_id: int) -> None:
+    st.markdown("#### Documentos do processo")
+    st.caption(
+        "Decisões relevantes · Peças processuais relevantes · Outros documentos"
+    )
+
+    chave_pasta = f"pasta_documentos_aberta_{processo_id}"
+    rotulo_botao = (
+        "Fechar pasta de documentos"
+        if st.session_state.get(chave_pasta, False)
+        else "Abrir pasta de documentos"
+    )
+    if st.button(
+        rotulo_botao,
+        key=f"botao_pasta_documentos_{processo_id}",
+        use_container_width=True,
+    ):
+        st.session_state[chave_pasta] = not st.session_state.get(chave_pasta, False)
+        st.rerun()
+
+    if not st.session_state.get(chave_pasta, False):
+        return
+
+    abas = st.tabs([rotulo for _, rotulo in CATEGORIAS_DOCUMENTAIS])
+    for aba, (categoria, _) in zip(abas, CATEGORIAS_DOCUMENTAIS):
+        with aba:
+            exibir_categoria_documental(processo_id, categoria)
+
 def exibir_processo(
     processo: pd.Series,
     mostrar_providencia_no_titulo: bool = False,
@@ -193,6 +384,9 @@ def exibir_processo(
         st.write(
             texto(processo.get("palavras_chave")) or "-"
         )
+
+        st.markdown("---")
+        exibir_documentos_processo(int(processo.get("id")))
 
         st.caption(
             "Última atualização: "
