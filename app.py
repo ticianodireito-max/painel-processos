@@ -283,13 +283,24 @@ if pagina == "Dashboard":
 
 
 elif pagina == "Cadastrar processo":
-    cabecalho_pagina("Cadastrar processo", "Inclua um novo processo estratégico no sistema.")
+    cabecalho_pagina(
+        "Cadastrar processo",
+        "Inclua um novo processo estratégico no sistema.",
+    )
 
     with st.form(
         "formulario_cadastro",
         clear_on_submit=True,
     ):
-        numero = st.text_input("Número do processo *")
+        st.markdown("### 1. Dados do processo")
+        st.caption(
+            "Informe os principais elementos de identificação do processo."
+        )
+
+        numero = st.text_input(
+            "Número do processo *",
+            placeholder="Ex.: 1000000-00.2026.8.11.0000",
+        )
 
         col1, col2 = st.columns(2)
 
@@ -298,23 +309,54 @@ elif pagina == "Cadastrar processo":
             AREAS,
         )
 
-        classe = col2.text_input("Classe processual")
+        classe = col2.text_input(
+            "Classe processual",
+            placeholder="Ex.: Ação Civil Pública",
+        )
 
-        assunto = st.text_input("Assunto")
+        assunto = st.text_input(
+            "Assunto",
+            placeholder="Informe o objeto principal da demanda.",
+        )
 
         col3, col4 = st.columns(2)
 
-        autor = col3.text_input("Autor")
-        reu = col4.text_input("Réu")
+        autor = col3.text_input(
+            "Autor",
+            placeholder="Nome da parte autora.",
+        )
+
+        reu = col4.text_input(
+            "Réu",
+            placeholder="Nome da parte ré.",
+        )
 
         col5, col6 = st.columns(2)
 
-        orgao_julgador = col5.text_input("Órgão julgador")
-        relator = col6.text_input("Relator")
+        orgao_julgador = col5.text_input(
+            "Órgão julgador",
+            placeholder="Ex.: 1ª Vara Especializada da Fazenda Pública",
+        )
+
+        relator = col6.text_input(
+            "Relator",
+            placeholder="Nome do magistrado ou desembargador.",
+        )
+
+        st.markdown("---")
+
+        st.markdown("### 2. Análise jurídica")
+        st.caption(
+            "Registre uma síntese jurídica que facilite a consulta futura."
+        )
 
         resumo = st.text_area(
             "Resumo jurídico do processo",
-            height=140,
+            placeholder=(
+                "Descreva os pedidos, os fundamentos relevantes, "
+                "as teses de defesa e a situação processual."
+            ),
+            height=160,
         )
 
         palavras_chave = st.text_area(
@@ -322,10 +364,14 @@ elif pagina == "Cadastrar processo":
             placeholder=(
                 "Ex.: ambiental; embargo; TCA; decadência; APP"
             ),
+            height=90,
         )
 
-        st.markdown(
-            "### Informações para acompanhamento gerencial"
+        st.markdown("---")
+
+        st.markdown("### 3. Acompanhamento")
+        st.caption(
+            "Defina a situação atual, o responsável e as medidas pendentes."
         )
 
         col7, col8 = st.columns(2)
@@ -344,7 +390,8 @@ elif pagina == "Cadastrar processo":
         col9, col10 = st.columns(2)
 
         responsavel = col9.text_input(
-            "Procurador responsável"
+            "Procurador responsável",
+            placeholder="Nome do procurador responsável.",
         )
 
         nivel_acesso = col10.selectbox(
@@ -352,27 +399,37 @@ elif pagina == "Cadastrar processo":
             NIVEIS_ACESSO,
         )
 
-        resumo_executivo = st.text_area(
-            "Resumo executivo para a chefia",
-            placeholder=(
-                "Informe o objeto, o risco para o Estado "
-                "e a situação atual."
-            ),
-            height=140,
-        )
-
         providencia_pendente = st.text_area(
             "Providência pendente",
             placeholder=(
-                "Ex.: apresentar contestação, solicitar "
-                "informações ou aguardar julgamento."
+                "Ex.: apresentar contestação, solicitar informações "
+                "ou aguardar julgamento."
             ),
+            height=110,
         )
 
         prazo_relevante = st.text_input(
             "Prazo relevante",
-            placeholder="Ex.: 05/08/2026 — contestação",
+            placeholder="Ex.: 05/08/2026 — apresentação de contestação",
         )
+
+        st.markdown("---")
+
+        st.markdown("### 4. Visão da chefia")
+        st.caption(
+            "Apresente uma síntese objetiva dos riscos e impactos para o Estado."
+        )
+
+        resumo_executivo = st.text_area(
+            "Resumo executivo para a chefia",
+            placeholder=(
+                "Informe o objeto da demanda, o risco para o Estado, "
+                "a situação atual e as providências mais relevantes."
+            ),
+            height=160,
+        )
+
+        st.markdown("---")
 
         enviar = st.form_submit_button(
             "Cadastrar processo",
@@ -392,27 +449,19 @@ elif pagina == "Cadastrar processo":
                         "assunto": assunto.strip(),
                         "autor": autor.strip(),
                         "reu": reu.strip(),
-                        "orgao_julgador": (
-                            orgao_julgador.strip()
-                        ),
+                        "orgao_julgador": orgao_julgador.strip(),
                         "relator": relator.strip(),
                         "resumo": resumo.strip(),
-                        "palavras_chave": (
-                            palavras_chave.strip()
-                        ),
+                        "palavras_chave": palavras_chave.strip(),
                         "prioridade": prioridade,
                         "situacao": situacao,
                         "responsavel": responsavel.strip(),
                         "nivel_acesso": nivel_acesso,
-                        "resumo_executivo": (
-                            resumo_executivo.strip()
-                        ),
+                        "resumo_executivo": resumo_executivo.strip(),
                         "providencia_pendente": (
                             providencia_pendente.strip()
                         ),
-                        "prazo_relevante": (
-                            prazo_relevante.strip()
-                        ),
+                        "prazo_relevante": prazo_relevante.strip(),
                     }
                 )
 
@@ -424,7 +473,6 @@ elif pagina == "Cadastrar processo":
                 st.error(
                     "Esse número de processo já está cadastrado."
                 )
-
 
 elif pagina == "Editar processo":
     cabecalho_pagina("Editar processo", "Atualize os dados de um processo já cadastrado.")
