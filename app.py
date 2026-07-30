@@ -219,7 +219,7 @@ pagina = pagina_com_icone.split("  ", 1)[1]
 
 if pagina == "Dashboard":
     cabecalho_pagina(
-        "Sistema Estratégico de Processos",
+        "Processos Estratégicos - SUBPGMA",
         "Painel de acompanhamento dos processos estratégicos, prioridades e providências pendentes.",
     )
 
