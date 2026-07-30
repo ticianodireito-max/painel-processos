@@ -162,3 +162,148 @@ def pesquisar_processos(termo: str) -> pd.DataFrame:
         )
 
     return processos[mascara].reset_index(drop=True)
+
+
+TABELA_DOCUMENTOS = "documentos_processo"
+BUCKET_DOCUMENTOS = "processos"
+
+COLUNAS_DOCUMENTOS = [
+    "id",
+    "processo_id",
+    "categoria",
+    "titulo",
+    "descricao",
+    "data_documento",
+    "nome_arquivo",
+    "caminho_storage",
+    "tamanho_bytes",
+    "data_upload",
+]
+
+CATEGORIAS_DOCUMENTOS = {"decisao", "peca", "outro"}
+
+
+class DocumentoInvalidoError(ValueError):
+    """Indica que o documento enviado nao atende aos requisitos."""
+
+
+def _nome_seguro(nome: str) -> str:
+    """Gera um nome simples e seguro para uso no Supabase Storage."""
+    import re
+    import unicodedata
+
+    nome_normalizado = unicodedata.normalize("NFKD", nome)
+    nome_ascii = nome_normalizado.encode("ascii", "ignore").decode("ascii")
+    nome_ascii = re.sub(r"[^A-Za-z0-9._-]+", "-", nome_ascii)
+    nome_ascii = re.sub(r"-+", "-", nome_ascii).strip("-.")
+    return nome_ascii or "documento.pdf"
+
+
+def cadastrar_documento(
+    processo_id: int,
+    categoria: str,
+    titulo: str,
+    descricao: str,
+    data_documento: str | None,
+    nome_arquivo: str,
+    conteudo: bytes,
+) -> dict[str, Any]:
+    """Envia um PDF ao Storage e registra seus metadados na tabela."""
+    from uuid import uuid4
+
+    categoria = categoria.strip().lower()
+    titulo = titulo.strip()
+    nome_arquivo = nome_arquivo.strip()
+
+    if categoria not in CATEGORIAS_DOCUMENTOS:
+        raise DocumentoInvalidoError("Categoria de documento invalida.")
+    if not titulo:
+        raise DocumentoInvalidoError("Informe o titulo do documento.")
+    if not nome_arquivo.lower().endswith(".pdf"):
+        raise DocumentoInvalidoError("Somente arquivos PDF sao permitidos.")
+    if not conteudo:
+        raise DocumentoInvalidoError("O arquivo PDF esta vazio.")
+    if not conteudo.startswith(b"%PDF"):
+        raise DocumentoInvalidoError("O arquivo enviado nao parece ser um PDF valido.")
+
+    cliente = obter_cliente_supabase()
+    nome_storage = f"{uuid4().hex}-{_nome_seguro(nome_arquivo)}"
+    caminho = f"{processo_id}/{categoria}/{nome_storage}"
+
+    cliente.storage.from_(BUCKET_DOCUMENTOS).upload(
+        caminho,
+        conteudo,
+        file_options={
+            "content-type": "application/pdf",
+            "upsert": "false",
+        },
+    )
+
+    registro = {
+        "processo_id": processo_id,
+        "categoria": categoria,
+        "titulo": titulo,
+        "descricao": descricao.strip() or None,
+        "data_documento": data_documento or None,
+        "nome_arquivo": nome_arquivo,
+        "caminho_storage": caminho,
+        "tamanho_bytes": len(conteudo),
+    }
+
+    try:
+        resposta = cliente.table(TABELA_DOCUMENTOS).insert(registro).execute()
+    except Exception:
+        cliente.storage.from_(BUCKET_DOCUMENTOS).remove([caminho])
+        raise
+
+    return resposta.data[0] if resposta.data else registro
+
+
+def listar_documentos(processo_id: int, categoria: str | None = None) -> pd.DataFrame:
+    cliente = obter_cliente_supabase()
+    consulta = (
+        cliente.table(TABELA_DOCUMENTOS)
+        .select("*")
+        .eq("processo_id", processo_id)
+    )
+
+    if categoria:
+        consulta = consulta.eq("categoria", categoria)
+
+    resposta = consulta.order("data_upload", desc=True).execute()
+    registros = resposta.data or []
+
+    if not registros:
+        return pd.DataFrame(columns=COLUNAS_DOCUMENTOS)
+
+    df = pd.DataFrame(registros)
+    for coluna in COLUNAS_DOCUMENTOS:
+        if coluna not in df.columns:
+            df[coluna] = None
+    return df[COLUNAS_DOCUMENTOS]
+
+
+def criar_url_documento(caminho_storage: str, validade_segundos: int = 3600) -> str:
+    """Cria uma URL temporaria para visualizar ou baixar um PDF privado."""
+    cliente = obter_cliente_supabase()
+    resposta = cliente.storage.from_(BUCKET_DOCUMENTOS).create_signed_url(
+        caminho_storage,
+        validade_segundos,
+    )
+
+    if isinstance(resposta, dict):
+        return str(
+            resposta.get("signedURL")
+            or resposta.get("signedUrl")
+            or resposta.get("signed_url")
+            or ""
+        )
+
+    return str(getattr(resposta, "signed_url", "") or "")
+
+
+def excluir_documento(documento_id: int, caminho_storage: str) -> None:
+    """Exclui o arquivo do Storage e seu registro da tabela."""
+    cliente = obter_cliente_supabase()
+    cliente.storage.from_(BUCKET_DOCUMENTOS).remove([caminho_storage])
+    cliente.table(TABELA_DOCUMENTOS).delete().eq("id", documento_id).execute()
