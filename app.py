@@ -235,7 +235,7 @@ if pagina == "Dashboard":
 
         urgentes = processos[processos["prioridade"].eq("Urgente")]
 
-                if "filtro_cartao_dashboard" not in st.session_state:
+        if "filtro_cartao_dashboard" not in st.session_state:
             st.session_state.filtro_cartao_dashboard = None
 
         col1, col2, col3, col4 = st.columns(4)
@@ -247,7 +247,6 @@ if pagina == "Dashboard":
                 "□",
                 "primary",
             )
-
             if st.button(
                 "Abrir lista",
                 key="abrir_todos_dashboard",
@@ -262,7 +261,6 @@ if pagina == "Dashboard":
                 "!",
                 "danger",
             )
-
             if st.button(
                 "Abrir lista",
                 key="abrir_urgentes_dashboard",
@@ -277,7 +275,6 @@ if pagina == "Dashboard":
                 "↑",
                 "warning",
             )
-
             if st.button(
                 "Abrir lista",
                 key="abrir_altas_dashboard",
@@ -292,7 +289,6 @@ if pagina == "Dashboard":
                 "✓",
                 "success",
             )
-
             if st.button(
                 "Abrir lista",
                 key="abrir_pendencias_dashboard",
@@ -306,21 +302,17 @@ if pagina == "Dashboard":
             if filtro_cartao == "todos":
                 titulo_lista = "Todos os processos cadastrados"
                 processos_filtrados = processos
-
             elif filtro_cartao == "urgentes":
                 titulo_lista = "Processos urgentes"
                 processos_filtrados = urgentes
-
             elif filtro_cartao == "altas":
                 titulo_lista = "Processos de alta prioridade"
                 processos_filtrados = prioridades_altas
-
             else:
                 titulo_lista = "Processos com providências pendentes"
                 processos_filtrados = pendencias
 
             st.markdown("---")
-
             coluna_titulo, coluna_fechar = st.columns([5, 1])
 
             with coluna_titulo:
@@ -339,9 +331,7 @@ if pagina == "Dashboard":
                     st.rerun()
 
             if processos_filtrados.empty:
-                st.info(
-                    "Não há processos cadastrados nessa categoria."
-                )
+                st.info("Não há processos cadastrados nessa categoria.")
             else:
                 for _, processo in processos_filtrados.iterrows():
                     exibir_processo(processo)
@@ -401,12 +391,7 @@ elif pagina == "Cadastrar processo":
         )
 
         col1, col2 = st.columns(2)
-
-        area = col1.selectbox(
-            "Área jurídica",
-            AREAS,
-        )
-
+        area = col1.selectbox("Área jurídica", AREAS)
         classe = col2.text_input(
             "Classe processual",
             placeholder="Ex.: Ação Civil Pública",
@@ -418,31 +403,26 @@ elif pagina == "Cadastrar processo":
         )
 
         col3, col4 = st.columns(2)
-
         autor = col3.text_input(
             "Autor",
             placeholder="Nome da parte autora.",
         )
-
         reu = col4.text_input(
             "Réu",
             placeholder="Nome da parte ré.",
         )
 
         col5, col6 = st.columns(2)
-
         orgao_julgador = col5.text_input(
             "Órgão julgador",
             placeholder="Ex.: 1ª Vara Especializada da Fazenda Pública",
         )
-
         relator = col6.text_input(
             "Relator",
             placeholder="Nome do magistrado ou desembargador.",
         )
 
         st.markdown("---")
-
         st.markdown("### 2. Análise jurídica")
         st.caption(
             "Registre uma síntese jurídica que facilite a consulta futura."
@@ -459,39 +439,29 @@ elif pagina == "Cadastrar processo":
 
         palavras_chave = st.text_area(
             "Palavras-chave",
-            placeholder=(
-                "Ex.: ambiental; embargo; TCA; decadência; APP"
-            ),
+            placeholder="Ex.: ambiental; embargo; TCA; decadência; APP",
             height=90,
         )
 
         st.markdown("---")
-
         st.markdown("### 3. Acompanhamento")
         st.caption(
             "Defina a situação atual, o responsável e as medidas pendentes."
         )
 
         col7, col8 = st.columns(2)
-
         prioridade = col7.selectbox(
             "Prioridade",
             PRIORIDADES,
             index=1,
         )
-
-        situacao = col8.selectbox(
-            "Situação",
-            SITUACOES,
-        )
+        situacao = col8.selectbox("Situação", SITUACOES)
 
         col9, col10 = st.columns(2)
-
         responsavel = col9.text_input(
             "Procurador responsável",
             placeholder="Nome do procurador responsável.",
         )
-
         nivel_acesso = col10.selectbox(
             "Nível de acesso",
             NIVEIS_ACESSO,
@@ -512,7 +482,6 @@ elif pagina == "Cadastrar processo":
         )
 
         st.markdown("---")
-
         st.markdown("### 4. Visão da chefia")
         st.caption(
             "Apresente uma síntese objetiva dos riscos e impactos para o Estado."
@@ -528,7 +497,6 @@ elif pagina == "Cadastrar processo":
         )
 
         st.markdown("---")
-
         enviar = st.form_submit_button(
             "Cadastrar processo",
             type="primary",
@@ -556,21 +524,13 @@ elif pagina == "Cadastrar processo":
                         "responsavel": responsavel.strip(),
                         "nivel_acesso": nivel_acesso,
                         "resumo_executivo": resumo_executivo.strip(),
-                        "providencia_pendente": (
-                            providencia_pendente.strip()
-                        ),
+                        "providencia_pendente": providencia_pendente.strip(),
                         "prazo_relevante": prazo_relevante.strip(),
                     }
                 )
-
-                st.success(
-                    "Processo cadastrado com sucesso."
-                )
-
+                st.success("Processo cadastrado com sucesso.")
             except ProcessoDuplicadoError:
-                st.error(
-                    "Esse número de processo já está cadastrado."
-                )
+                st.error("Esse número de processo já está cadastrado.")
 
 elif pagina == "Editar processo":
     cabecalho_pagina("Editar processo", "Atualize os dados de um processo já cadastrado.")
