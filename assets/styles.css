@@ -466,3 +466,46 @@ hr {
         min-height: 132px;
     }
 }
+
+/* Cartões de processos: resumo compacto com detalhes sob demanda. */
+[data-testid="stVerticalBlockBorderWrapper"]:has(.process-card-marker) {
+    border: 1px solid var(--app-border) !important;
+    border-radius: 16px !important;
+    background: var(--app-surface) !important;
+    box-shadow: var(--app-shadow-sm);
+    margin-bottom: 0.9rem;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"]:has(.process-card-marker):hover {
+    transform: translateY(-2px);
+    box-shadow: var(--app-shadow-md);
+    border-color: color-mix(in srgb, var(--app-primary) 36%, var(--app-border)) !important;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"]:has(.process-card-marker) h3 {
+    margin-top: 0;
+    margin-bottom: 0.25rem;
+    font-size: 1.08rem;
+    letter-spacing: -0.015em;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"]:has(.process-card-marker) [data-testid="stCaptionContainer"] {
+    letter-spacing: 0.025em;
+    font-weight: 650;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"]:has(.process-card-details-marker) {
+    background: color-mix(in srgb, var(--app-surface) 92%, var(--app-background));
+}
+
+.process-card-marker,
+.process-card-details-marker {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    [data-testid="stVerticalBlockBorderWrapper"]:has(.process-card-marker) {
+        border-radius: 13px !important;
+    }
+}
