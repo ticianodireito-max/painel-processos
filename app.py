@@ -23,7 +23,7 @@ from database import (
 
 
 st.set_page_config(
-    page_title="Sistema Estratégico de Processos",
+    page_title="Processos Estratégicos - SUBPGMA",
     page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="expanded",
