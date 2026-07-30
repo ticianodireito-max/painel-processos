@@ -444,20 +444,19 @@ def exibir_processo(
                 unsafe_allow_html=True,
             )
 
-        with st.container(border=True):
+        st.markdown('<div class="executive-sections-label">CONSULTE OS DETALHES</div>', unsafe_allow_html=True)
+
+        with st.expander("📋 Situação em síntese", expanded=False):
             st.markdown('<span class="process-block-marker process-block-executive"></span>', unsafe_allow_html=True)
-            st.markdown("#### 📋 Situação em síntese")
             st.write(resumo_executivo)
 
-        with st.container(border=True):
+        with st.expander("📚 Decisões e peças relevantes", expanded=False):
             st.markdown('<span class="process-block-marker process-block-documents"></span>', unsafe_allow_html=True)
-            st.markdown("#### 📚 Decisões e peças relevantes")
-            st.caption("Acesse primeiro os documentos estratégicos do processo. Os demais permanecem organizados em categoria própria.")
+            st.caption("Acesse os documentos estratégicos do processo por categoria.")
             exibir_documentos_processo(processo_id, contexto)
 
-        with st.container(border=True):
+        with st.expander("📌 Informações processuais", expanded=False):
             st.markdown('<span class="process-block-marker process-block-info"></span>', unsafe_allow_html=True)
-            st.markdown("#### 📌 Informações processuais")
             col1, col2 = st.columns(2)
 
             col1.write(f"**Área:** {area}")
@@ -472,14 +471,12 @@ def exibir_processo(
             col2.write(f"**Órgão julgador:** {orgao}")
             col2.write(f"**Relator:** {relator}")
 
-        with st.container(border=True):
+        with st.expander("⚖️ Resumo jurídico", expanded=False):
             st.markdown('<span class="process-block-marker process-block-legal"></span>', unsafe_allow_html=True)
-            st.markdown("#### ⚖️ Resumo jurídico")
             st.write(texto(processo.get("resumo")) or "-")
 
-        with st.container(border=True):
+        with st.expander("🏷️ Palavras-chave", expanded=False):
             st.markdown('<span class="process-block-marker process-block-keywords"></span>', unsafe_allow_html=True)
-            st.markdown("#### 🏷️ Palavras-chave")
             st.write(texto(processo.get("palavras_chave")) or "-")
 
 
