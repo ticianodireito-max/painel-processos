@@ -325,82 +325,106 @@ def exibir_processo(
     contexto: str = "processo",
     expandido: bool = False,
 ) -> None:
-    titulo = (
-        f"{texto(processo.get('numero'))} — "
-        f"{texto(processo.get('assunto')) or 'Sem assunto'}"
-    )
+    processo_id = int(processo.get("id"))
+    chave_aberto = f"cartao_processo_aberto_{contexto}_{processo_id}"
 
-    if mostrar_providencia_no_titulo:
-        providencia = texto(processo.get("providencia_pendente")).strip()
-        if providencia:
-            titulo += f" | Providência: {providencia}"
+    if chave_aberto not in st.session_state:
+        st.session_state[chave_aberto] = expandido
 
-    with st.expander(titulo, expanded=expandido):
+    numero = texto(processo.get("numero")) or "Sem número"
+    assunto = texto(processo.get("assunto")) or "Sem assunto"
+    prioridade = texto(processo.get("prioridade")) or "Não informada"
+    situacao = texto(processo.get("situacao")) or "Não informada"
+    responsavel = texto(processo.get("responsavel")) or "Não informado"
+    prazo = texto(processo.get("prazo_relevante")) or "Sem prazo registrado"
+    providencia = texto(processo.get("providencia_pendente")).strip()
+
+    icones_prioridade = {
+        "Urgente": "🔴",
+        "Alta": "🟠",
+        "Normal": "🔵",
+        "Baixa": "⚪",
+    }
+    icone_prioridade = icones_prioridade.get(prioridade, "⚪")
+
+    with st.container(border=True):
+        st.markdown('<span class="process-card-marker"></span>', unsafe_allow_html=True)
+
+        coluna_principal, coluna_status, coluna_acao = st.columns([5.2, 2.2, 1.45])
+
+        with coluna_principal:
+            st.markdown(f"### ⚖️ {numero}")
+            st.write(assunto)
+
+        with coluna_status:
+            st.caption("PRIORIDADE")
+            st.markdown(f"**{icone_prioridade} {prioridade}**")
+            st.caption(f"Situação: {situacao}")
+
+        with coluna_acao:
+            rotulo = "Fechar" if st.session_state[chave_aberto] else "Abrir processo"
+            if st.button(
+                rotulo,
+                key=f"alternar_cartao_{contexto}_{processo_id}",
+                use_container_width=True,
+                type="primary" if not st.session_state[chave_aberto] else "secondary",
+            ):
+                st.session_state[chave_aberto] = not st.session_state[chave_aberto]
+                st.rerun()
+
+        coluna_responsavel, coluna_prazo, coluna_providencia = st.columns([1.4, 1.4, 2.6])
+        with coluna_responsavel:
+            st.caption("RESPONSÁVEL")
+            st.write(responsavel)
+        with coluna_prazo:
+            st.caption("PRAZO RELEVANTE")
+            st.write(prazo)
+        with coluna_providencia:
+            st.caption("PROVIDÊNCIA PENDENTE")
+            if providencia:
+                st.write(providencia)
+            elif mostrar_providencia_no_titulo:
+                st.write("Nenhuma providência registrada")
+            else:
+                st.write("—")
+
+        if not st.session_state[chave_aberto]:
+            return
+
+        st.markdown('<div class="process-card-details-marker"></div>', unsafe_allow_html=True)
+        st.markdown("---")
+
         col1, col2 = st.columns(2)
 
-        col1.write(
-            f"**Área:** {texto(processo.get('area')) or '-'}"
-        )
-        col1.write(
-            f"**Classe:** {texto(processo.get('classe')) or '-'}"
-        )
-        col1.write(
-            f"**Autor:** {texto(processo.get('autor')) or '-'}"
-        )
-        col1.write(
-            f"**Réu:** {texto(processo.get('reu')) or '-'}"
-        )
-        col1.write(
-            f"**Responsável:** "
-            f"{texto(processo.get('responsavel')) or '-'}"
-        )
+        col1.write(f"**Área:** {texto(processo.get('area')) or '-'}")
+        col1.write(f"**Classe:** {texto(processo.get('classe')) or '-'}")
+        col1.write(f"**Autor:** {texto(processo.get('autor')) or '-'}")
+        col1.write(f"**Réu:** {texto(processo.get('reu')) or '-'}")
+        col1.write(f"**Responsável:** {responsavel}")
 
-        col2.write(
-            f"**Prioridade:** "
-            f"{texto(processo.get('prioridade')) or '-'}"
-        )
-        col2.write(
-            f"**Situação:** "
-            f"{texto(processo.get('situacao')) or '-'}"
-        )
-        col2.write(
-            f"**Nível de acesso:** "
-            f"{texto(processo.get('nivel_acesso')) or '-'}"
-        )
-        col2.write(
-            f"**Órgão julgador:** "
-            f"{texto(processo.get('orgao_julgador')) or '-'}"
-        )
-        col2.write(
-            f"**Relator:** "
-            f"{texto(processo.get('relator')) or '-'}"
-        )
+        col2.write(f"**Prioridade:** {prioridade}")
+        col2.write(f"**Situação:** {situacao}")
+        col2.write(f"**Nível de acesso:** {texto(processo.get('nivel_acesso')) or '-'}")
+        col2.write(f"**Órgão julgador:** {texto(processo.get('orgao_julgador')) or '-'}")
+        col2.write(f"**Relator:** {texto(processo.get('relator')) or '-'}")
 
         st.markdown("#### Resumo executivo")
-        st.write(
-            texto(processo.get("resumo_executivo")) or "-"
-        )
+        st.write(texto(processo.get("resumo_executivo")) or "-")
 
         st.markdown("#### Providência pendente")
-        st.write(
-            texto(processo.get("providencia_pendente")) or "-"
-        )
+        st.write(providencia or "-")
 
         st.markdown("#### Prazo relevante")
-        st.write(
-            texto(processo.get("prazo_relevante")) or "-"
-        )
+        st.write(prazo)
 
         st.markdown("#### Resumo jurídico")
         st.write(texto(processo.get("resumo")) or "-")
 
         st.markdown("#### Palavras-chave")
-        st.write(
-            texto(processo.get("palavras_chave")) or "-"
-        )
+        st.write(texto(processo.get("palavras_chave")) or "-")
 
         st.markdown("---")
-        exibir_documentos_processo(int(processo.get("id")), contexto)
+        exibir_documentos_processo(processo_id, contexto)
 
         st.caption(
             "Última atualização: "
