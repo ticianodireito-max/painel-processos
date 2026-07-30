@@ -1093,13 +1093,18 @@ small {
 [data-theme="dark"] .executive-summary-label { color: #a9bfd8; }
 
 /* ======================================================================
-   CAMADA FINAL DE COMPATIBILIDADE DOS FORMULARIOS
-   Mantem os campos claros e legiveis independentemente da preferencia
-   de cor do sistema operacional ou do tema selecionado no Streamlit.
+   FORMULARIOS ADAPTATIVOS AO TEMA
+   Light: fundo branco e texto escuro.
+   Dark: fundo escuro e texto claro.
    ====================================================================== */
-:root {
+
+/* Valores padrao e tema claro. */
+:root,
+html[data-theme="light"],
+body[data-theme="light"],
+[data-theme="light"] {
     --form-background: #ffffff;
-    --form-background-disabled: #f1f5f9;
+    --form-background-disabled: #eef2f7;
     --form-text: #111827;
     --form-muted: #64748b;
     --form-label: #1e293b;
@@ -1107,8 +1112,35 @@ small {
     --form-border-hover: #7da7d9;
     --form-focus: #2563eb;
     --form-focus-ring: rgba(37, 99, 235, 0.18);
-    --form-radius: 12px;
+    --form-menu-background: #ffffff;
+    --form-option-hover: #eaf2ff;
+    --form-chip-background: #dfeeff;
+    --form-chip-border: #b4ceee;
+    --form-chip-text: #17406f;
+    --form-upload-background: #f8fbff;
     --form-shadow: 0 3px 10px rgba(30, 64, 175, 0.07);
+}
+
+/* Tema escuro real do Streamlit. */
+html[data-theme="dark"],
+body[data-theme="dark"],
+[data-theme="dark"] {
+    --form-background: #1f2937;
+    --form-background-disabled: #253247;
+    --form-text: #f8fafc;
+    --form-muted: #a8b3c4;
+    --form-label: #dce6f2;
+    --form-border: #46566d;
+    --form-border-hover: #6f86a3;
+    --form-focus: #60a5fa;
+    --form-focus-ring: rgba(96, 165, 250, 0.22);
+    --form-menu-background: #1f2937;
+    --form-option-hover: #2f4058;
+    --form-chip-background: #294665;
+    --form-chip-border: #42698f;
+    --form-chip-text: #e7f2ff;
+    --form-upload-background: #182435;
+    --form-shadow: 0 3px 12px rgba(0, 0, 0, 0.22);
 }
 
 /* Rotulos e textos de ajuda. */
@@ -1134,7 +1166,7 @@ small {
     background-color: var(--form-background) !important;
     color: var(--form-text) !important;
     border-color: var(--form-border) !important;
-    border-radius: var(--form-radius) !important;
+    border-radius: 12px !important;
     box-shadow: var(--form-shadow) !important;
 }
 
@@ -1155,7 +1187,6 @@ small {
     opacity: 1 !important;
 }
 
-/* Placeholder claramente distinguivel do valor preenchido. */
 .stApp input::placeholder,
 .stApp textarea::placeholder,
 .stApp [data-baseweb="select"] input::placeholder {
@@ -1164,7 +1195,6 @@ small {
     opacity: 1 !important;
 }
 
-/* Interacao. */
 .stApp [data-baseweb="input"]:hover,
 .stApp [data-baseweb="textarea"]:hover,
 .stApp [data-baseweb="select"] > div:hover {
@@ -1180,29 +1210,23 @@ small {
     box-shadow: 0 0 0 3px var(--form-focus-ring), var(--form-shadow) !important;
 }
 
-/* Campos desabilitados continuam legiveis. */
 .stApp input:disabled,
 .stApp textarea:disabled,
 .stApp [aria-disabled="true"] [data-baseweb="select"] > div {
     background-color: var(--form-background-disabled) !important;
-    color: #475569 !important;
-    -webkit-text-fill-color: #475569 !important;
+    color: var(--form-muted) !important;
+    -webkit-text-fill-color: var(--form-muted) !important;
     opacity: 1 !important;
 }
 
-/* Menus abertos de selectbox, multiselect e date input. */
-[data-baseweb="popover"],
-[data-baseweb="menu"],
-[data-baseweb="calendar"] {
-    color: var(--form-text) !important;
-}
-
+/* Menus e calendario sao renderizados fora de .stApp. */
 [data-baseweb="popover"] > div,
 [data-baseweb="menu"],
 [data-baseweb="calendar"],
 ul[role="listbox"] {
-    background-color: #ffffff !important;
+    background-color: var(--form-menu-background) !important;
     border-color: var(--form-border) !important;
+    color: var(--form-text) !important;
 }
 
 li[role="option"],
@@ -1218,25 +1242,25 @@ ul[role="listbox"] span,
 
 li[role="option"]:hover,
 li[role="option"][aria-selected="true"] {
-    background-color: #eaf2ff !important;
+    background-color: var(--form-option-hover) !important;
 }
 
 /* Chips do multiselect. */
 .stApp [data-baseweb="tag"] {
-    background-color: #dfeeff !important;
-    border-color: #b4ceee !important;
+    background-color: var(--form-chip-background) !important;
+    border-color: var(--form-chip-border) !important;
 }
 
 .stApp [data-baseweb="tag"] span,
 .stApp [data-baseweb="tag"] svg {
-    color: #17406f !important;
+    color: var(--form-chip-text) !important;
     fill: currentColor !important;
-    -webkit-text-fill-color: #17406f !important;
+    -webkit-text-fill-color: var(--form-chip-text) !important;
 }
 
 /* Area de upload. */
 .stApp [data-testid="stFileUploaderDropzone"] {
-    background-color: #f8fbff !important;
+    background-color: var(--form-upload-background) !important;
     border-color: var(--form-border) !important;
 }
 
