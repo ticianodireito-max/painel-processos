@@ -509,3 +509,60 @@ hr {
         border-radius: 13px !important;
     }
 }
+
+/* Ficha aberta do processo organizada em blocos visuais. */
+[data-testid="stVerticalBlockBorderWrapper"]:has(.process-block-marker) {
+    position: relative;
+    overflow: hidden;
+    margin-top: 0.75rem;
+    padding: 0.25rem 0.35rem;
+    border: 1px solid var(--app-border) !important;
+    border-radius: 14px !important;
+    background: color-mix(in srgb, var(--app-surface) 96%, var(--app-background)) !important;
+    box-shadow: none;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"]:has(.process-block-marker)::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: var(--app-primary);
+}
+
+[data-testid="stVerticalBlockBorderWrapper"]:has(.process-block-executive)::before {
+    background: #039855;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"]:has(.process-block-legal)::before {
+    background: #7f56d9;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"]:has(.process-block-keywords)::before {
+    background: #dc6803;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"]:has(.process-block-documents)::before {
+    background: #1570ef;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"]:has(.process-block-marker) h4 {
+    margin-top: 0.15rem;
+    margin-bottom: 0.65rem;
+    font-size: 1rem;
+    letter-spacing: -0.01em;
+}
+
+[data-testid="stVerticalBlockBorderWrapper"]:has(.process-block-marker) p:last-child {
+    margin-bottom: 0.15rem;
+}
+
+.process-block-marker {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    [data-testid="stVerticalBlockBorderWrapper"]:has(.process-block-marker) {
+        border-radius: 12px !important;
+    }
+}
