@@ -373,3 +373,41 @@ hr {
         min-height: 96px;
     }
 }
+/* Sidebar sempre escura */
+[data-testid="stSidebar"] {
+    background-color: #101318 !important;
+}
+
+/* Todo o texto da sidebar sempre branco */
+[data-testid="stSidebar"] *,
+[data-testid="stSidebar"] label,
+[data-testid="stSidebar"] span,
+[data-testid="stSidebar"] p,
+[data-testid="stSidebar"] h1,
+[data-testid="stSidebar"] h2,
+[data-testid="stSidebar"] h3,
+[data-testid="stSidebar"] h4,
+[data-testid="stSidebar"] h5,
+[data-testid="stSidebar"] h6,
+[data-testid="stSidebar"] div {
+    color: #ffffff !important;
+}
+
+/* Ícones também brancos */
+[data-testid="stSidebar"] svg {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+}
+
+/* Inputs, selects e textareas */
+[data-testid="stSidebar"] input,
+[data-testid="stSidebar"] textarea,
+[data-testid="stSidebar"] select {
+    color: #ffffff !important;
+}
+
+/* Placeholder */
+[data-testid="stSidebar"] input::placeholder,
+[data-testid="stSidebar"] textarea::placeholder {
+    color: rgba(255,255,255,.7) !important;
+}
