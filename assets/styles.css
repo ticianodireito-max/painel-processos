@@ -1344,3 +1344,49 @@ li[role="option"][aria-selected="true"] {
     -webkit-text-fill-color: #475569 !important;
     opacity: 1 !important;
 }
+/* =========================================================
+   RÓTULOS DOS FORMULÁRIOS SOBRE FUNDO AZUL-ESCURO
+   ========================================================= */
+
+/* Títulos dos campos */
+[data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"],
+[data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] p,
+[data-testid="stAppViewContainer"] .stTextInput label,
+[data-testid="stAppViewContainer"] .stTextArea label,
+[data-testid="stAppViewContainer"] .stSelectbox label,
+[data-testid="stAppViewContainer"] .stMultiSelect label,
+[data-testid="stAppViewContainer"] .stDateInput label,
+[data-testid="stAppViewContainer"] .stNumberInput label,
+[data-testid="stAppViewContainer"] .stFileUploader label {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* Texto interno dos rótulos gerados pelo Streamlit */
+[data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] span,
+[data-testid="stAppViewContainer"] [data-testid="stWidgetLabel"] div {
+    color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+/* Mantém os campos brancos com texto preto */
+[data-testid="stAppViewContainer"] input,
+[data-testid="stAppViewContainer"] textarea,
+[data-testid="stAppViewContainer"] [data-baseweb="select"] > div {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    caret-color: #111827 !important;
+}
+
+/* Placeholders */
+[data-testid="stAppViewContainer"] input::placeholder,
+[data-testid="stAppViewContainer"] textarea::placeholder {
+    color: #64748b !important;
+    opacity: 1 !important;
+}
+
+/* Texto selecionado nos menus */
+[data-testid="stAppViewContainer"] [data-baseweb="select"] span,
+[data-testid="stAppViewContainer"] [data-baseweb="select"] input {
+    color: #111827 !important;
+}
