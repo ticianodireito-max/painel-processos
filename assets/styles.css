@@ -1390,3 +1390,68 @@ li[role="option"][aria-selected="true"] {
 [data-testid="stAppViewContainer"] [data-baseweb="select"] input {
     color: #111827 !important;
 }
+
+/* ======================================================================
+   CORRECAO FINAL DE CONTRASTE DOS ROTULOS E DESCRICOES DOS FORMULARIOS
+   Mantem os campos brancos com texto preto, mas deixa os textos externos
+   dos formularios brancos sobre o fundo azul-escuro.
+   ====================================================================== */
+
+[data-testid="stAppViewContainer"] main label,
+[data-testid="stAppViewContainer"] main label *,
+[data-testid="stAppViewContainer"] main [data-testid="stWidgetLabel"],
+[data-testid="stAppViewContainer"] main [data-testid="stWidgetLabel"] *,
+[data-testid="stAppViewContainer"] main [data-testid="stSelectbox"] label,
+[data-testid="stAppViewContainer"] main [data-testid="stSelectbox"] label *,
+[data-testid="stAppViewContainer"] main [data-testid="stTextInput"] label,
+[data-testid="stAppViewContainer"] main [data-testid="stTextInput"] label *,
+[data-testid="stAppViewContainer"] main [data-testid="stTextArea"] label,
+[data-testid="stAppViewContainer"] main [data-testid="stTextArea"] label *,
+[data-testid="stAppViewContainer"] main [data-testid="stNumberInput"] label,
+[data-testid="stAppViewContainer"] main [data-testid="stNumberInput"] label *,
+[data-testid="stAppViewContainer"] main [data-testid="stDateInput"] label,
+[data-testid="stAppViewContainer"] main [data-testid="stDateInput"] label *,
+[data-testid="stAppViewContainer"] main [data-testid="stFileUploader"] label,
+[data-testid="stAppViewContainer"] main [data-testid="stFileUploader"] label * {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    opacity: 1 !important;
+}
+
+[data-testid="stAppViewContainer"] main [data-testid="stForm"] [data-testid="stCaptionContainer"],
+[data-testid="stAppViewContainer"] main [data-testid="stForm"] [data-testid="stCaptionContainer"] *,
+[data-testid="stAppViewContainer"] main [data-testid="stForm"] .stCaption,
+[data-testid="stAppViewContainer"] main [data-testid="stForm"] .stCaption *,
+[data-testid="stAppViewContainer"] main [data-testid="stForm"] small {
+    color: #dbeafe !important;
+    -webkit-text-fill-color: #dbeafe !important;
+    opacity: 1 !important;
+}
+
+[data-testid="stAppViewContainer"] main input,
+[data-testid="stAppViewContainer"] main textarea,
+[data-testid="stAppViewContainer"] main [data-baseweb="select"] > div,
+[data-testid="stAppViewContainer"] main [data-baseweb="input"],
+[data-testid="stAppViewContainer"] main [data-baseweb="textarea"] {
+    background-color: #ffffff !important;
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+    caret-color: #111827 !important;
+}
+
+[data-testid="stAppViewContainer"] main [data-baseweb="select"] span,
+[data-testid="stAppViewContainer"] main [data-baseweb="select"] input,
+[data-testid="stAppViewContainer"] main [data-baseweb="select"] svg,
+[data-testid="stAppViewContainer"] main [data-baseweb="input"] svg {
+    color: #111827 !important;
+    fill: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+}
+
+[data-testid="stAppViewContainer"] main input::placeholder,
+[data-testid="stAppViewContainer"] main textarea::placeholder {
+    color: #64748b !important;
+    -webkit-text-fill-color: #64748b !important;
+    opacity: 1 !important;
+}
+
